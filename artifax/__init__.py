@@ -1,24 +1,6 @@
-""" artifax is a Python package to evaluate nodes in a computation graph where
+"""artifax is a Python package to evaluate nodes in a computation graph where
 the dependencies associated with each node are extracted directly from their
 function signatures.
-
->>> from artifax import build
->>> artifacts = {
->>>     'A': 42,
->>>     'B': lambda: 7,
->>>     'C': lambda: 10,
->>>     'AB': lambda A, B: A + B,
->>>     'C minus B': lambda B, C: C - B,
->>>     'greet': 'Hello',
->>>     'msg': lambda greet, A: '{} World! The answer is {}.'.format(greet, A),
->>> }
->>> result = build(artifacts)
->>> print(result['AB'])
-49
->>> print(result['C minus B']
-3
->>> print(result['msg'])
-Hello World! The answer is 42.
 """
 
 __all__ = ['build']
