@@ -1,0 +1,76 @@
+""" artifax is a Python package to evaluate nodes in a computation graph where
+the dependencies associated with each node are extracted directly from their
+function signatures.
+
+>>> from artifax import build
+>>> artifacts = {
+>>>     'A': 42,
+>>>     'B': lambda: 7,
+>>>     'C': lambda: 10,
+>>>     'AB': lambda A, B: A + B,
+>>>     'C minus B': lambda B, C: C - B,
+>>>     'greet': 'Hello',
+>>>     'msg': lambda greet, A: '{} World! The answer is {}.'.format(greet, A),
+>>> }
+>>> result = build(artifacts)
+>>> print(result['AB'])
+49
+>>> print(result['C minus B']
+3
+>>> print(result['msg'])
+Hello World! The answer is 42.
+"""
+
+__all__ = ['build']
+
+from inspect import getfullargspec
+from functools import reduce
+
+_arglist = lambda v: getfullargspec(v).args if callable(v) else []
+_apply = lambda v, *args: v(*args) if callable(v) else v
+_identity = lambda x: x
+
+class CircularDependencyError(Exception):
+    """ Exception to be thrown when artifacts can not be built due to the fact
+    that there is at least one closed loop in its graph representation which
+    means we can not determine an evaluation order for the artifact nodes"""
+    pass
+
+def _to_graph(artifacts):
+    af_args = {k: _arglist(v) for k, v in artifacts.items()}
+    return {
+        key: [k for k, v in af_args.items() if key in v]
+        for key in artifacts
+    }
+
+def _topological_sort(graph):
+    def _visit(node, temp, perm, tlist):
+        if node in perm:
+            return
+        if node in temp:
+            raise CircularDependencyError('artifact graph is not a DAG')
+        temp.add(node)
+        for neighbor in graph[node]:
+            _visit(neighbor, temp, perm, tlist)
+        perm.add(node)
+        tlist.insert(0, node)
+
+    unmarked = set(graph.keys())
+    temp = set()
+    perm = set()
+    tlist = []
+    while unmarked:
+        node = unmarked.pop()
+        _visit(node, temp, perm, tlist)
+    return tlist
+
+def build(artifacts):
+    """ build :: Dict a -> a -> a """
+    graph = _to_graph(artifacts)
+    nodes = _topological_sort(graph)
+    def _reducer(result, node):
+        value = result[node]
+        result[node] = _apply(value, *[result[a] for a in _arglist(value)])
+        return result
+
+    return reduce(_reducer, nodes, artifacts.copy())
