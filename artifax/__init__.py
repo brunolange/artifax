@@ -6,11 +6,14 @@ function signatures.
 __all__ = ['build']
 
 from inspect import getfullargspec
-from functools import reduce
+from functools import reduce, partial
 
 _arglist = lambda v: getfullargspec(v).args if callable(v) else []
-_apply = lambda v, *args: v(*args) if callable(v) else v
-_identity = lambda x: x
+_apply = lambda v, *args: (
+    v(*args) if callable(v) and len(args) and len(_arglist(v)) == len(args) else
+    partial(v, *args) if callable(v) else
+    v
+)
 
 class CircularDependencyError(Exception):
     """ Exception to be thrown when artifacts can not be built due to the fact
@@ -52,7 +55,8 @@ def build(artifacts):
     nodes = _topological_sort(graph)
     def _reducer(result, node):
         value = result[node]
-        result[node] = _apply(value, *[result[a] for a in _arglist(value)])
+        args = [result[a] for a in _arglist(value) if a in result]
+        result[node] = _apply(value, *args)
         return result
 
     return reduce(_reducer, nodes, artifacts.copy())
