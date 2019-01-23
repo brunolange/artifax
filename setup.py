@@ -8,7 +8,7 @@ setup(
     description='python package for building artifacts from a computational graph',
     author='Bruno Lange',
     author_email='blangeram@gmail.com',
-    url='https://gitlab.com/brunolange/artifacts',
+    url='https://gitlab.com/brunolange/artifax',
     install_requires=requirements,
     extras_require={
         'dev': [
