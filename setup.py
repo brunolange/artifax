@@ -5,12 +5,13 @@ with open('requirements.txt') as handle:
 
 setup(
     name='artifax',
-    version='0.0.1',
+    version='0.0.2',
     description='python package for building artifacts from a computational graph',
     author='Bruno Lange',
     author_email='blangeram@gmail.com',
     url='https://gitlab.com/brunolange/artifax',
     install_requires=requirements,
+    python_requires='>=3',
     extras_require={
         'dev': [
             'pylint'
