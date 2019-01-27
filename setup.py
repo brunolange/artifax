@@ -1,6 +1,7 @@
 from setuptools import setup
 
-requirements = ['Jinja2']
+with open('requirements.txt') as handle:
+    requirements = handle.readlines()
 
 setup(
     name='artifax',
