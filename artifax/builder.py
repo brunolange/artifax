@@ -7,13 +7,16 @@ _apply = lambda v, *args: (
     v
 )
 
-def build(artifacts):
-    """ build :: Dict a -> a -> a """
+def assemble(artifacts, graph, nodes):
     def _reducer(result, node):
         value = result[node]
         args = [result[a] for a in utils.arglist(value) if a in result]
         result[node] = _apply(value, *args)
         return result
+    return reduce(_reducer, nodes, artifacts.copy())
+
+def build(artifacts):
+    """ build :: Dict a -> a -> a """
     graph = utils.to_graph(artifacts)
     nodes = utils.topological_sort(graph)
-    return reduce(_reducer, nodes, artifacts.copy())
+    return assemble(artifacts, graph, nodes)
