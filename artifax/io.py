@@ -1,11 +1,11 @@
-from . import _to_graph, _topological_sort
 from functools import reduce
 from jinja2 import Template
 import os
+from . import utils
 
 def tex(artifacts):
-    graph = _to_graph(artifacts)
-    nodes = _topological_sort(graph)
+    graph = utils.to_graph(artifacts)
+    nodes = utils.topological_sort(graph)
 
     def _edge_reducer(pairs, key):
         for value in graph[key]:

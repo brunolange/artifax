@@ -55,3 +55,17 @@ C-B       : 3
 greeting  : Hello
 message   : Hello World! The answer is 42.
 ```
+
+# Error handling
+
+If the computation graph represented by the artifacts dictionary is not a DAG,
+a `CircularDependencyError` exception is thrown.
+
+```python
+import artifax
+try:
+    _ = artifax.build({'x': lambda x: x+1})
+except artifax.CircularDependencyError as err:
+    print('Cannot build artifacts: {}'.format(err))
+    # Cannot build artifacts: artifact graph is not a DAG
+```
