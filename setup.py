@@ -1,6 +1,6 @@
 from setuptools import setup
 
-requirements = []
+requirements = ['Jinja2']
 
 setup(
     name='artifax',

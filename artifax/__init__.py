@@ -49,10 +49,7 @@ def _topological_sort(graph):
         _visit(node, temp, perm, tlist)
     return tlist
 
-def build(artifacts):
-    """ build :: Dict a -> a -> a """
-    graph = _to_graph(artifacts)
-    nodes = _topological_sort(graph)
+def _build(artifacts, graph, nodes):
     def _reducer(result, node):
         value = result[node]
         args = [result[a] for a in _arglist(value) if a in result]
@@ -60,3 +57,10 @@ def build(artifacts):
         return result
 
     return reduce(_reducer, nodes, artifacts.copy())
+
+def build(artifacts):
+    """ build :: Dict a -> a -> a """
+    graph = _to_graph(artifacts)
+    nodes = _topological_sort(graph)
+    return _build(artifacts, graph, nodes)
+
