@@ -9,9 +9,12 @@ _apply = lambda v, *args: (
 
 def assemble(artifacts, nodes, cache={}):
     def _reducer(result, node):
-        value = result[node]
-        args = [result[a] for a in utils.arglist(value) if a in result]
-        result[node] = cache[node] if node in cache else _apply(value, *args)
+        if node in cache:
+            result[node] = cache[node]
+        else:
+            value = result[node]
+            args = [result[a] for a in utils.arglist(value) if a in result]
+            result[node] = _apply(value, *args)
         return result
     return reduce(_reducer, nodes, artifacts.copy())
 
