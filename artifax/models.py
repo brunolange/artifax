@@ -4,49 +4,38 @@ from . import utils
 class Artifax:
     def __init__(self, dic={}):
         self._data = dic
-        self._needs_refresh = True
-        self._result = None
         self._graph = None
-        self._sorting = None
+        self._cache = {}
 
-    def _void(self):
-        self._result = None
-        self._graph = None
-        self._sorting = None
+    def _revoke(self, node):
+        _ = self._cache.pop(node)
+        for k in self.graph()[node]:
+            self._revoke(k)
 
-    def add(self, node, value):
+    def set(self, node, value):
+        if node in self._data:
+            self._revoke(node)
         self._data[node] = value
-        self._void()
 
     def pop(self, node):
-        self._void()
         return self._data.pop(node)
 
     def graph(self):
-        graph = self._graph
-        if graph is None:
-            graph = utils.to_graph(self._data)
-            self._graph = graph
-        return graph
+        return utils.to_graph(self._data)
 
     def sort(self):
-        sorting = self._sorting
-        if sorting is None:
-            sorting = utils.topological_sort(self.graph())
-            self._sorting = sorting
-        return sorting
+        return utils.topological_sort(self.graph())
 
     def _build(self):
-        graph = self.graph()
         nodes = self.sort()
-        return builder.assemble(self._data, graph, nodes)
+        return builder.assemble(self._data, nodes, cache=self._cache)
 
     def build(self):
-        result = self._result
-        if result is None:
-            result = self._build()
-            self._result = result
-        return result.copy()
+        result = self._build()
+        for k, v in result.items():
+            if not callable(v):
+                self._cache[k] = v
+        return result
 
     def __len__(self):
         return len(self._data)

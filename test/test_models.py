@@ -1,19 +1,20 @@
 import unittest
+import math
 from artifax import Artifax
 
-class BuildTest(unittest.TestCase):
+class ModelTest(unittest.TestCase):
 
     def test_artifax_add(self):
         af = Artifax()
-        af.add('a', 42)
+        af.set('a', 42)
         self.assertTrue(len(af) == 1)
 
-        af.add('b', lambda a: a/3.14)
+        af.set('b', lambda a: a/3.14)
         self.assertTrue(len(af) == 2)
 
     def test_artifax_pop(self):
         af = Artifax()
-        af.add('c', 'C')
+        af.set('c', 'C')
         c = af.pop('c')
         self.assertEqual(c, 'C')
 
@@ -36,6 +37,29 @@ class BuildTest(unittest.TestCase):
         self.assertEqual(result['list'], [1,2,3])
         self.assertEqual(result['dictionary'], {'answer': 42})
         self.assertEqual(result['set'], set([1,2,3.14]))
+
+    def test_artifax_incremental_build(self):
+        class ExpensiveObject:
+            def __init__(self):
+                self.counter = 0
+            def expensive_method(self, _):
+                self.counter += 1
+                return 'foobar'
+
+        exo = ExpensiveObject()
+        af = Artifax({
+            'p': (3,4),
+            'q': (12, 13),
+            'exo': lambda q: exo.expensive_method(q),
+        })
+        _ = af.build()
+        self.assertEqual(exo.counter, 1)
+        af.set('p', (1,1))
+        _ = af.build()
+        self.assertEqual(exo.counter, 1)
+        af.set('q', (0,0))
+        _ = af.build()
+        self.assertEqual(exo.counter, 2)
 
 if __name__ == '__main__':
     unittest.main()
