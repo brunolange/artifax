@@ -5,22 +5,22 @@ from artifax import Artifax
 class ModelTest(unittest.TestCase):
 
     def test_artifax_add(self):
-        af = Artifax()
-        af.set('a', 42)
-        self.assertTrue(len(af) == 1)
+        afx = Artifax()
+        afx.set('a', 42)
+        self.assertTrue(len(afx) == 1)
 
-        af.set('b', lambda a: a/3.14)
-        self.assertTrue(len(af) == 2)
+        afx.set('b', lambda a: a/3.14)
+        self.assertTrue(len(afx) == 2)
 
     def test_artifax_pop(self):
-        af = Artifax()
-        af.set('c', 'C')
-        c = af.pop('c')
+        afx = Artifax()
+        afx.set('c', 'C')
+        c = afx.pop('c')
         self.assertEqual(c, 'C')
 
     def test_artifax_build(self):
         obj = object()
-        af = Artifax({
+        afx = Artifax({
             'int': 42,
             'float': 1.618,
             'string': 'Hello',
@@ -29,7 +29,7 @@ class ModelTest(unittest.TestCase):
             'dictionary': {'answer': 42},
             'set': set([1,2,3.14])
         })
-        result = af.build()
+        result = afx.build()
         self.assertEqual(result['int'], 42)
         self.assertEqual(result['float'], 1.618)
         self.assertEqual(result['string'], 'Hello')
@@ -47,29 +47,29 @@ class ModelTest(unittest.TestCase):
                 return 'foobar'
 
         exo = ExpensiveObject()
-        af = Artifax({
+        afx = Artifax({
             'p': (3,4),
             'q': (12, 13),
             'exo': lambda q: exo.expensive_method(q),
         })
-        _ = af.build()
+        _ = afx.build()
         self.assertEqual(exo.counter, 1)
 
-        af.set('p', (1,1))
-        _ = af.build()
+        afx.set('p', (1,1))
+        _ = afx.build()
         self.assertEqual(exo.counter, 1)
 
-        af.set('q', (0,0))
-        _ = af.build()
+        afx.set('q', (0,0))
+        _ = afx.build()
         self.assertEqual(exo.counter, 2)
 
-        af.set('new', 'hello')
-        result = af.build()
+        afx.set('new', 'hello')
+        result = afx.build()
         self.assertEqual(result['new'], 'hello')
         self.assertEqual(exo.counter, 2)
 
-        af.pop('new')
-        _ = af.build()
+        afx.pop('new')
+        _ = afx.build()
         self.assertEqual(exo.counter, 2)
 
 if __name__ == '__main__':
