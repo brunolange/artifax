@@ -1,5 +1,19 @@
 image: python:3.6
-test:
+
+stages:
+  - test
+  - build
+
+tests:
+  stage: test
   script:
   - pip install -r requirements.txt
   - python3 -m unittest discover test
+
+build:
+  stage: build
+  script:
+  - python3 setup.py sdist
+  artifacts:
+    paths:
+    - dist/
