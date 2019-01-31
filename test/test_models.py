@@ -54,10 +54,21 @@ class ModelTest(unittest.TestCase):
         })
         _ = af.build()
         self.assertEqual(exo.counter, 1)
+
         af.set('p', (1,1))
         _ = af.build()
         self.assertEqual(exo.counter, 1)
+
         af.set('q', (0,0))
+        _ = af.build()
+        self.assertEqual(exo.counter, 2)
+
+        af.set('new', 'hello')
+        result = af.build()
+        self.assertEqual(result['new'], 'hello')
+        self.assertEqual(exo.counter, 2)
+
+        af.pop('new')
         _ = af.build()
         self.assertEqual(exo.counter, 2)
 
