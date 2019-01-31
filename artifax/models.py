@@ -154,6 +154,9 @@ class Artifax:
         ])
         return payload if len(payload) > 1 else payload[0]
 
+    def branes(self):
+        return utils.branes(utils.to_graph(self._artifacts))
+
     def __len__(self):
         return len(self._artifacts)
 

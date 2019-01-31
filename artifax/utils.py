@@ -52,6 +52,9 @@ def topological_sort(graph):
         _visit(node, temp, perm, tlist)
     return tlist
 
+def branes(graph):
+    return set([k for k in graph if len(graph[k]) == 0])
+
 class At:
     """ The At class is but a wrapper for a tuple-like constructor
     that can be used to assign node values in a compact way without

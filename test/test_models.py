@@ -97,6 +97,15 @@ class ModelTest(unittest.TestCase):
         self.assertEqual(exo.counter, 2)
         self.assertEqual(result.sorting(), [])
 
+    def test_branes(self):
+        afx = Artifax({
+            'earth': object(),
+            'un': lambda earth: 'dirt!',
+            'mars': object(),
+            'mcrn': lambda mars: 'dust!',
+        })
+        self.assertTrue(afx.branes(), set(['earth', 'mars']))
+
     def test_in_operator(self):
         afx = Artifax({
             'p': (3,4)
