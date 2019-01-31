@@ -72,5 +72,12 @@ class ModelTest(unittest.TestCase):
         _ = afx.build()
         self.assertEqual(exo.counter, 2)
 
+    def test_operators(self):
+        afx = Artifax({
+            'p': (3,4)
+        })
+        self.assertTrue('p' in afx)
+        self.assertFalse('q' in afx)
+
 if __name__ == '__main__':
     unittest.main()

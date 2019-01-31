@@ -40,3 +40,6 @@ class Artifax:
 
     def __len__(self):
         return len(self._artifacts)
+
+    def __contains__(self, node):
+        return node in self._artifacts
