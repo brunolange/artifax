@@ -5,7 +5,7 @@ with open('requirements.txt') as handle:
 
 setup(
     name='artifax',
-    version='0.0.2',
+    version='0.0.3',
     description='python package for building artifacts from a computational graph',
     author='Bruno Lange',
     author_email='blangeram@gmail.com',
