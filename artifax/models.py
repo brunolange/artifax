@@ -24,14 +24,18 @@ class Artifax:
         return self._artifacts.pop(node)
 
     def build(self):
-        shipment = {
-            k: self._artifacts[k]
-            for k in self._stale
-        }
+        afx = builder.build({
+            'ts': lambda _x: utils.topological_sort(_x),
+            'tg': lambda _x: utils.to_graph(_x),
+            'shipment': {
+                k: self._artifacts[k]
+                for k in self._stale
+            },
+            'nodes': lambda ts, tg, shipment: ts(tg(shipment)),
+            'result': lambda shipment, nodes: builder.assemble(shipment, nodes)
+        })
         self._stale = set()
-        nodes = utils.topological_sort(utils.to_graph(shipment))
-        result = builder.assemble(shipment, nodes)
-        self._result.update(result)
+        self._result.update(afx['result'])
         return self._result.copy()
 
     def __len__(self):
