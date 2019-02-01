@@ -3,7 +3,7 @@ from . import utils
 
 class Artifax:
     def __init__(self, dic={}):
-        self._artifacts = dic
+        self._artifacts = dic.copy()
         self._result = {}
         self._stale = set(list(self._artifacts.keys()))
 

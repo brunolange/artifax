@@ -8,14 +8,19 @@ class ModelTest(unittest.TestCase):
         afx = Artifax()
         afx.set('a', 42)
         self.assertTrue(len(afx) == 1)
+        self.assertTrue('a' in afx)
 
-        afx.set('b', lambda a: a/3.14)
+        afx.set('x', lambda a: a/3.14)
         self.assertTrue(len(afx) == 2)
+        self.assertTrue('x' in afx)
+
+        self.assertFalse('y' in afx)
 
     def test_artifax_pop(self):
         afx = Artifax()
         afx.set('c', 'C')
         c = afx.pop('c')
+        self.assertTrue(len(afx) == 0)
         self.assertEqual(c, 'C')
 
     def test_artifax_build(self):
