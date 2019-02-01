@@ -10,7 +10,8 @@ _apply = lambda v, *args: (
 def assemble(artifacts, nodes):
     def _reducer(result, node):
         value = result[node]
-        args = [result[a] for a in utils.arglist(value) if a in result]
+        keys = [utils.unescape(a) for a in utils.arglist(value)]
+        args = [result[key] for key in keys if key in result]
         result[node] = _apply(value, *args)
         return result
     return reduce(_reducer, nodes, artifacts.copy())

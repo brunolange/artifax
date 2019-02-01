@@ -64,5 +64,15 @@ class BuildTest(unittest.TestCase):
         self.assertEqual(result['B'](-5), 25)
         self.assertEqual(result['C'](6), 'A(4)-6 is equal to 10')
 
+    def test_special_keys(self):
+        artifacts = {
+            'key-with-dash': 'a value',
+            'bang': lambda key_with_dash: '{}!'.format(key_with_dash),
+            '_underscore_key': lambda bang: '_{}_'.format(bang),
+        }
+        result = build(artifacts)
+        self.assertEqual(result['bang'], 'a value!')
+        self.assertEqual(result['_underscore_key'], '_a value!_')
+
 if __name__ == '__main__':
     unittest.main()
