@@ -74,25 +74,32 @@ class Artifax:
         if dic is None:
             dic = {}
         self._artifacts = dic.copy()
+        self._graph = None
+        self._update_graph()
         self._result = Artifax.Result()
         self._stale = set(list(self._artifacts.keys()))
         self._allow_partial_functions = allow_partial_functions
 
+    def _update_graph(self):
+        self._graph = utils.to_graph(self._artifacts)
+
     def set(self, node, value):
         if node in self._artifacts:
-            self._revoke(node, utils.to_graph(self._artifacts))
+            self._revoke(node)
         self._stale.add(node)
         self._artifacts[node] = value
+        self._update_graph()
 
-    def _revoke(self, node, graph):
+    def _revoke(self, node):
         self._stale.add(node)
-        for neighbor in graph[node]:
-            self._revoke(neighbor, graph)
+        utils.consume(self._graph[node], self._revoke)
 
     def pop(self, node):
         if node in self._stale:
             self._stale.remove(node)
-        return self._artifacts.pop(node)
+        item = self._artifacts.pop(node)
+        self._update_graph()
+        return item
 
     def _shipment(self, targets=None):
         graph = utils.to_graph(self._artifacts)
@@ -117,7 +124,7 @@ class Artifax:
                     _moonwalk(vertex, graph, dependencies)
 
         dependencies = []
-        _moonwalk(node, graph, dependencies)
+        _moonwalk(node, self._graph, dependencies)
         return dependencies
 
     def build(self, targets=None, allow_partial_functions=None):
@@ -155,7 +162,7 @@ class Artifax:
         return payload if len(payload) > 1 else payload[0]
 
     def branes(self):
-        return utils.branes(utils.to_graph(self._artifacts))
+        return utils.branes(self._graph))
 
     def __len__(self):
         return len(self._artifacts)
