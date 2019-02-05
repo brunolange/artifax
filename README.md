@@ -60,6 +60,22 @@ greeting  : Hello
 message   : Hello World! The answer is 42.
 ```
 
+# Artifax class
+
+In addition to the `build` function, artifacts can be built by `Artifax` class
+instances.
+
+```python
+from artifax import Artifax
+
+afx = Artifax()
+afx.set('a', 42)
+afx.set('b', lambda a: a*2)
+afx.set('c', lambda b: -b)
+
+print(afx.get('c)) # prints -84
+```
+
 # Error handling
 
 If the computation graph represented by the artifacts dictionary is not a DAG,
