@@ -34,6 +34,7 @@ in the computation graph.
 
 ```python
 from artifax import build
+
 artifacts = {
     'A': 42,
     'B': lambda: 7,
@@ -44,8 +45,11 @@ artifacts = {
     'message': lambda greeting, A: '{} World! The answer is {}.'.format(greeting, A)
 }
 result = build(artifacts)
-_ = [print('{:<10}: {}'.format(k, v)) for k, v in result.items()]
+
+for k, v in result.items():
+    print('{:<10}: {}'.format(k, v))
 ```
+outputs
 ```shell
 A         : 42
 B         : functools.partial(<function <lambda> at 0x101db5e18>)
