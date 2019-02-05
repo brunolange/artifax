@@ -73,7 +73,9 @@ afx.set('a', 42)
 afx.set('b', lambda a: a*2)
 afx.set('c', lambda b: -b)
 
-print(afx.get('c)) # prints -84
+print(afx.get('c')) # prints -84
+print(len(afx)) # prints 3
+print('b' in afx) # prints True
 ```
 
 # Error handling
