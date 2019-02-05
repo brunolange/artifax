@@ -52,7 +52,7 @@ def topological_sort(graph):
         _visit(node, temp, perm, tlist)
     return tlist
 
-def consume(iter, accept):
+def each(iter, accept):
     for item in iter:
         accept(item)
 

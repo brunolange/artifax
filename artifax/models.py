@@ -92,7 +92,7 @@ class Artifax:
 
     def _revoke(self, node):
         self._stale.add(node)
-        utils.consume(self._graph[node], self._revoke)
+        utils.each(self._graph[node], self._revoke)
 
     def pop(self, node):
         if node in self._stale:
