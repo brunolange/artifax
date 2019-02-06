@@ -27,6 +27,7 @@ artifacts = {
 yields the following computation graph:
 
 ![Screenshot](sample-dag.png)
+<div style="font-style:italic">Figure 1. Example of a computation graph.</div>
 
 The `build` function evalutes the entire computation graph and returns a new dictionary
 with the same keys as the original one and with the calculated values for each of the nodes
@@ -37,10 +38,10 @@ from artifax import build
 
 artifacts = {
     'A': 42,
-    'B': lambda: 7,
+    'B': 7,
     'C': lambda: 10,
-    'AB': lambda A, B: A*B(),
-    'C-B': lambda B, C: C() - B(),
+    'AB': lambda A, B: A*B,
+    'C-B': lambda B, C: C() - B,
     'greeting': 'Hello',
     'message': lambda greeting, A: '{} World! The answer is {}.'.format(greeting, A)
 }
@@ -73,9 +74,62 @@ afx.set('a', 42)
 afx.set('b', lambda a: a*2)
 afx.set('c', lambda b: -b)
 
-print(afx.get('c')) # prints -84
 print(len(afx)) # prints 3
 print('b' in afx) # prints True
+
+results = afx.build()
+for k, v in results.items():
+    print(k, v)
+```
+```
+c -84
+a 42
+b 84
+```
+
+Artifax instances optimize sequential builds by only re-evaluating nodes that
+have become stale due to an update. For example, given the graph illustrated in
+Figure 1, if node `B` is updated, e.g, `afx.set('B', -5))`, nodes `B`, `AB` and
+`C-B` get re-evaluated when the build method is invoked, but not any other
+nodes.
+
+In the example below, the second call to the `build` method triggers a
+re-evaluation of node `p1` and all the nodes that depend on it. Nodes `v2` and
+`m2`, on the other hand, do not require re-evaluation since they do not depend
+on the updated node.
+
+```python
+import artifax
+import math
+
+class Vector:
+    def __init__(self, u, v):
+        self.u = u
+        self.v = v
+    def magnitude(self):
+        print('Calculating magnitude of vector {}...'.format(self)
+        return math.sqrt(self.u**2 + self.v**2)
+    def __repr__(self):
+        return '({}, {})'.format(self.u, self.v)
+
+afx = artifax.Artifax({
+    'p1': (3, 4),
+    'v1': lambda p1: Vector(*p1),
+    'm1': lambda v1: v1.magnitude(),
+    'v2': Vector(5, 12),
+    'm2': lambda v2: v2.magnitude()
+})
+_ = afx.build()
+print('Updating p1...')
+afx.set('p1', (1, 1))
+_ = afx.build()
+```
+
+```
+Calculating magnitude of vector (3, 4)...
+Calculating magnitude of vector (5, 12)...
+Updating p1...
+Calculating magnitude of vector (1, 1)...
 ```
 
 # Error handling
@@ -89,5 +143,7 @@ try:
     _ = artifax.build({'x': lambda x: x+1})
 except artifax.CircularDependencyError as err:
     print('Cannot build artifacts: {}'.format(err))
-    # Cannot build artifacts: artifact graph is not a DAG
+```
+```
+Cannot build artifacts: artifact graph is not a DAG
 ```
