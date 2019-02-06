@@ -16,7 +16,7 @@ For example, the following dictionary:
 ```python
 artifacts = {
     'A': 42,
-    'B': lambda: 7,
+    'B': 7,
     'C': lambda: 10,
     'AB': lambda A, B: A*B(),
     'C-B': lambda B, C: C() - B(),
