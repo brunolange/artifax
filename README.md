@@ -18,8 +18,8 @@ artifacts = {
     'A': 42,
     'B': 7,
     'C': lambda: 10,
-    'AB': lambda A, B: A*B(),
-    'C-B': lambda B, C: C() - B(),
+    'AB': lambda A, B: A*B,
+    'C-B': lambda B, C: C() - B,
     'greeting': 'Hello',
     'message': lambda greeting, A: '{} World! The answer is {}.'.format(greeting, A)
 }
