@@ -53,7 +53,7 @@ for k, v in result.items():
 outputs
 ```shell
 A         : 42
-B         : functools.partial(<function <lambda> at 0x101db5e18>)
+B         : 7
 C         : functools.partial(<function <lambda> at 0x102c4fae8>)
 AB        : 294
 C-B       : 3
