@@ -100,11 +100,13 @@ class ModelTest(unittest.TestCase):
     def test_branes(self):
         afx = Artifax({
             'earth': object(),
-            'un': lambda earth: 'dirt!',
+            'un': lambda earth: 'dirt @{}'.format(earth),
             'mars': object(),
-            'mcrn': lambda mars: 'dust!',
+            'mcrn': lambda mars: 'dust @{}'.format(mars),
+            'belt': object(),
+            'opa': lambda belt: 'ice @{}'.format(belt)
         })
-        self.assertTrue(afx.branes(), set(['earth', 'mars']))
+        self.assertEqual(afx.branes(), set(['earth', 'mars', 'belt']))
 
     def test_in_operator(self):
         afx = Artifax({

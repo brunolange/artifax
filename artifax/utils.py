@@ -57,7 +57,15 @@ def each(iter, accept):
         accept(item)
 
 def branes(graph):
-    return set([k for k in graph if len(graph[k]) == 0])
+    nodes = list(graph.keys())
+    mask = [0] * len(nodes)
+    key = {nodes[i]: i for i in range(len(nodes))}
+    for node in nodes:
+        neighbors = graph[node]
+        for neighbor in neighbors:
+            mask[key[neighbor]] = 1
+
+    return set([nodes[i] for i in range(len(mask)) if mask[i] == 0])
 
 class At:
     """ The At class is but a wrapper for a tuple-like constructor
