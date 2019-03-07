@@ -52,10 +52,6 @@ def topological_sort(graph):
         _visit(node, temp, perm, tlist)
     return tlist
 
-def each(iter, accept):
-    for item in iter:
-        accept(item)
-
 def branes(graph):
     nodes = list(graph.keys())
     mask = [0] * len(nodes)

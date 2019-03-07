@@ -2,6 +2,7 @@ from functools import reduce
 import operator
 from . import builder
 from . import utils
+from . import langda as ft
 
 def fluent(cls, attr, *args):
     if args:
@@ -92,7 +93,7 @@ class Artifax:
 
     def _revoke(self, node):
         self._stale.add(node)
-        utils.each(self._graph[node], self._revoke)
+        ft.each(self._graph[node], self._revoke)
 
     def pop(self, node):
         if node in self._stale:
