@@ -10,11 +10,15 @@ class ModelTest(unittest.TestCase):
     def test_add(self):
         afx = Artifax()
         afx.set('a', 42)
-        self.assertTrue(len(afx) == 1)
+        self.assertEqual(len(afx), 1)
+        self.assertEqual(afx.number_of_nodes(), 1)
+        self.assertEqual(afx.number_of_edges(), 0)
         self.assertTrue('a' in afx)
 
         afx.set('x', lambda a: a/3.14)
-        self.assertTrue(len(afx) == 2)
+        self.assertEqual(len(afx), 2)
+        self.assertEqual(afx.number_of_nodes(), 2)
+        self.assertEqual(afx.number_of_edges(), 1)
         self.assertTrue('x' in afx)
 
         self.assertFalse('y' in afx)

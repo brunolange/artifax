@@ -165,8 +165,14 @@ class Artifax:
     def branes(self):
         return utils.branes(self._graph))
 
-    def __len__(self):
+    def number_of_edges(self):
+        return sum([len(v) for v in self._graph.values()])
+
+    def number_of_nodes(self):
         return len(self._artifacts)
+
+    def __len__(self):
+        return self.number_of_nodes()
 
     def __contains__(self, node):
         return node in self._artifacts
