@@ -53,13 +53,15 @@ def topological_sort(graph):
     return tlist
 
 def branes(graph):
-    nodes = list(graph.keys())
-    mask = [0] * len(nodes)
-    key = {nodes[i]: i for i in range(len(nodes))}
-    for node in nodes:
+    def to_mask(mask, node, graph, key):
         neighbors = graph[node]
         for neighbor in neighbors:
             mask[key[neighbor]] = 1
+        return mask
+
+    nodes = list(graph.keys())
+    key = {nodes[i]: i for i in range(len(nodes))}
+    mask = reduce(lambda m, n: to_mask(m, n, graph, key), nodes, [0]*len(nodes))
 
     return set([nodes[i] for i in range(len(mask)) if mask[i] == 0])
 
