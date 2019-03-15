@@ -7,17 +7,19 @@ _apply = lambda v, *args: (
     v
 )
 
-def assemble(artifacts, nodes):
+def assemble(artifacts, nodes, allow_partial_functions=False):
     def _reducer(result, node):
         value = result[node]
         keys = [utils.unescape(a) for a in utils.arglist(value)]
-        args = [result[key] for key in keys if key in result]
+        if not allow_partial_functions:
+            args = [result[key] for key in keys]
+        else:
+            args = [result[key] for key in keys if key in result]
         result[node] = _apply(value, *args)
         return result
     return reduce(_reducer, nodes, artifacts.copy())
 
-def build(artifacts):
-    """ build :: Dict a -> a -> a """
+def build(artifacts, allow_partial_functions=False):
     graph = utils.to_graph(artifacts)
     nodes = utils.topological_sort(graph)
-    return assemble(artifacts, nodes)
+    return assemble(artifacts, nodes, allow_partial_functions)
