@@ -1,6 +1,7 @@
 import unittest
 from functools import partial
 from artifax import build
+from artifax.exceptions import UnresolvedDependencyError
 
 class BuildTest(unittest.TestCase):
 
@@ -70,7 +71,7 @@ class BuildTest(unittest.TestCase):
             'a': 42,
             'b': lambda A: A*2
         }
-        with self.assertRaises(KeyError):
+        with self.assertRaises(UnresolvedDependencyError):
             _ = build(artifacts)
 
         result = build(artifacts, allow_partial_functions=True)
