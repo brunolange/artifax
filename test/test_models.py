@@ -1,6 +1,8 @@
 import unittest
 import math
+from functools import partial
 from artifax import Artifax
+from artifax.exceptions import UnresolvedDependencyError
 
 class ModelTest(unittest.TestCase):
 
@@ -42,6 +44,18 @@ class ModelTest(unittest.TestCase):
         self.assertEqual(result['list'], [1,2,3])
         self.assertEqual(result['dictionary'], {'answer': 42})
         self.assertEqual(result['set'], set([1,2,3.14]))
+
+    def test_invalid_build(self):
+        artifacts = {
+            'a': 42,
+            'b': lambda A: A*2
+        }
+        afx = Artifax(artifacts)
+        with self.assertRaises(UnresolvedDependencyError):
+            _ = afx.build()
+
+        result = afx.build(allow_partial_functions=True)
+        self.assertIsInstance(result['b'], partial)
 
     def test_artifax_incremental_build(self):
         class ExpensiveObject:

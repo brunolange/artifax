@@ -1,5 +1,7 @@
 import unittest
+from functools import partial
 from artifax import build
+from artifax.exceptions import UnresolvedDependencyError
 
 class BuildTest(unittest.TestCase):
 
@@ -58,11 +60,22 @@ class BuildTest(unittest.TestCase):
             'B': lambda A, x: A(x),
             'C': lambda A, x: 'A(4)-{} is equal to {}'.format(x, A(4)-x)
         }
-        result = build(artifacts)
+        result = build(artifacts, allow_partial_functions=True)
         self.assertTrue(callable(result['A']))
         self.assertEqual(result['A'](4), 16)
         self.assertEqual(result['B'](-5), 25)
         self.assertEqual(result['C'](6), 'A(4)-6 is equal to 10')
+
+    def test_build_with_partial_functions(self):
+        artifacts = {
+            'a': 42,
+            'b': lambda A: A*2
+        }
+        with self.assertRaises(UnresolvedDependencyError):
+            _ = build(artifacts)
+
+        result = build(artifacts, allow_partial_functions=True)
+        self.assertIsInstance(result['b'], partial)
 
     def test_special_keys(self):
         artifacts = {
