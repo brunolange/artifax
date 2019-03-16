@@ -71,25 +71,30 @@ class ModelTest(unittest.TestCase):
             'q': (12, 13),
             'exo': lambda q: exo.expensive_method(q),
         })
-        _ = afx.build()
+        result = afx.build()
         self.assertEqual(exo.counter, 1)
+        self.assertEqual(len(result.sorting()), len(afx))
 
         afx.set('p', (1,1))
-        _ = afx.build()
+        result = afx.build()
         self.assertEqual(exo.counter, 1)
+        self.assertListEqual(result.sorting(), ['p'])
 
         afx.set('q', (0,0))
-        _ = afx.build()
+        result = afx.build()
         self.assertEqual(exo.counter, 2)
+        self.assertListEqual(result.sorting(), ['q', 'exo'])
 
         afx.set('new', 'hello')
         result = afx.build()
         self.assertEqual(result['new'], 'hello')
         self.assertEqual(exo.counter, 2)
+        self.assertEqual(result.sorting(), ['new'])
 
         afx.pop('new')
-        _ = afx.build()
+        result = afx.build()
         self.assertEqual(exo.counter, 2)
+        self.assertEqual(result.sorting(), [])
 
     def test_in_operator(self):
         afx = Artifax({
@@ -103,6 +108,23 @@ class ModelTest(unittest.TestCase):
 
         afx.set('q', (1,2))
         self.assertTrue('q' in afx)
+
+    def test_result_info(self):
+        afx = Artifax({
+            'A': 42,
+            'B': lambda: 7,
+            'C': lambda: 10,
+            'AB': lambda A, B: A + B(),
+            'C minus B': lambda B, C: C() - B(),
+            'greet': 'Hello',
+            'msg': lambda greet, A: '{} World! The answer is {}.'.format(greet, A),
+        })
+        result = afx.build()
+        sorting = result.sorting()
+        index = lambda k: sorting.index(k)
+        self.assertLess(index('A'), index('AB'))
+        self.assertGreater(index('msg'), index('greet'))
+        self.assertGreater(index('msg'), index('A'))
 
 if __name__ == '__main__':
     unittest.main()
