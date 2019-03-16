@@ -60,7 +60,9 @@ class Artifax:
         return node in self._artifacts
 
 class Result():
-    """ acts as a dictionary """
+    """ The Result class acts as an augmented dictionary to
+    hold the artifax build products and any additional information
+    deemed necessary or interesting. """
     def __init__(self, *args, **kwargs):
         self._data = {}
         self.update(*args, **kwargs)
