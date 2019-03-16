@@ -104,5 +104,22 @@ class ModelTest(unittest.TestCase):
         afx.set('q', (1,2))
         self.assertTrue('q' in afx)
 
+    def test_result_info(self):
+        afx = Artifax({
+            'A': 42,
+            'B': lambda: 7,
+            'C': lambda: 10,
+            'AB': lambda A, B: A + B(),
+            'C minus B': lambda B, C: C() - B(),
+            'greet': 'Hello',
+            'msg': lambda greet, A: '{} World! The answer is {}.'.format(greet, A),
+        })
+        result = afx.build()
+        sorting = result.sorting()
+        index = lambda k: sorting.index(k)
+        self.assertLess(index('A'), index('AB'))
+        self.assertGreater(index('msg'), index('greet'))
+        self.assertGreater(index('msg'), index('A'))
+
 if __name__ == '__main__':
     unittest.main()
