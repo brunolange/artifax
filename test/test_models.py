@@ -142,8 +142,19 @@ class ModelTest(unittest.TestCase):
             'exp': lambda: Exp().counter + 4
         })
         result = afx.build(target='b')
+        # exp = 5, b = 42^5
+        self.assertEqual(result, 130691232)
+        # C should not have been instantiated
+        self.assertEqual(C.counter, 0)
+        result = afx.build(target='b')
+        # no updates, all nodes are fresh
         self.assertEqual(result, 130691232)
         self.assertEqual(C.counter, 0)
+        # trigger new exp: 6
+        result = afx.build(target='exp')
+        self.assertEqual(result(), 6)
+        _ = afx.build()
+        self.assertEqual(Exp.counter, 2)
 
 if __name__ == '__main__':
     unittest.main()
