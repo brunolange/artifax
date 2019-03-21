@@ -30,14 +30,38 @@ class Artifax:
             self._stale.remove(node)
         return self._artifacts.pop(node)
 
-    def build(self, allow_partial_functions=None):
+    def _shipment(self, target=None):
+        shipment = {
+            k: self._artifacts[k]
+            for k in self._stale
+        }
+        if target:
+            shipment = {
+                k: self._artifacts[k]
+                for k in self._dependencies(target) + [target]
+                if k in shipment
+            }
+        return shipment
+
+    def _dependencies(self, node):
+        def _moonwalk(node, graph, dependencies):
+            for vertex, neighbors in graph.items():
+                if node in neighbors:
+                    dependencies.append(vertex)
+                    _moonwalk(vertex, graph, dependencies)
+
+        graph = utils.to_graph(self._artifacts)
+        dependencies = []
+        _moonwalk(node, graph, dependencies)
+        return dependencies
+
+    def build(self, target=None, allow_partial_functions=None):
+        if target and target not in self:
+            raise KeyError(target)
         afx = builder.build({
             'ts': lambda _x: utils.topological_sort(_x),
             'tg': lambda _x: utils.to_graph(_x),
-            'shipment': {
-                k: self._artifacts[k]
-                for k in self._stale
-            },
+            'shipment': self._shipment(target),
             'nodes': lambda ts, tg, shipment: ts(tg(shipment)),
             'result': lambda shipment, nodes: builder.assemble(
                 shipment,
@@ -51,7 +75,7 @@ class Artifax:
         self._stale = set()
         self._result.update(afx['result'])
         self._result.sorting(afx['nodes'])
-        return self._result
+        return self._result if target is None else self._result[target]
 
     def __len__(self):
         return len(self._artifacts)
