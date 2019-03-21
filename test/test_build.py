@@ -1,5 +1,6 @@
 import unittest
 from functools import partial
+import math
 from artifax import build
 from artifax.exceptions import UnresolvedDependencyError
 

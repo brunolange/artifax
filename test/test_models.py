@@ -126,5 +126,24 @@ class ModelTest(unittest.TestCase):
         self.assertGreater(index('msg'), index('greet'))
         self.assertGreater(index('msg'), index('A'))
 
+    def test_targeted_build(self):
+        class C:
+            counter = 0
+            def __init__(self):
+                C.counter += 1
+        class Exp:
+            counter = 0
+            def __init__(self):
+                Exp.counter += 1
+        afx = Artifax({
+            'a': 42,
+            'b': lambda a, exp: math.pow(a, exp()),
+            'c': lambda: C(),
+            'exp': lambda: Exp().counter + 4
+        })
+        result = afx.build(target='b')
+        self.assertEqual(result, 130691232)
+        self.assertEqual(C.counter, 0)
+
 if __name__ == '__main__':
     unittest.main()
