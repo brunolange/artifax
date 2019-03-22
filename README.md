@@ -132,6 +132,38 @@ Updating p1...
 Calculating magnitude of vector (1, 1)...
 ```
 
+# Targeted builds
+The `build` method accepts an optional argument that specifies which node in
+your computation graph should be built. Instead of returning the usual dictionary,
+targeted builds return the value associated with the target node.
+
+```python
+terminal_node_value = afx.build(target='terminal_node')
+```
+
+Targeted builds only evaluate depencies for the target node and the target node itself.
+Any other nodes in the computation graph do not get evaluated.
+
+```python
+import math
+class C:
+    counter = 0
+    def __init__(self):
+        C.counter += 1
+afx = Artifax({
+    'a': 42,
+    'b': lambda a: math.pow(a, 2),
+    'c': lambda: C(),
+})
+print(result, type(result)) # 1764.0 <class 'float'>
+print(C.counter) # 0
+_ = afx.build()
+print(C.counter) # 1
+```
+
+Targeted builds might be an efficient way of retrieving certain nodes
+without the need to evaluate the entire computation graph.
+
 # Error handling
 
 If the computation graph represented by the artifacts dictionary is not a DAG,
