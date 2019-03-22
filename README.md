@@ -146,6 +146,7 @@ Any other nodes in the computation graph do not get evaluated.
 
 ```python
 import math
+from artifax import Artifax
 class C:
     counter = 0
     def __init__(self):
