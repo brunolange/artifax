@@ -137,25 +137,22 @@ class ModelTest(unittest.TestCase):
     def test_stale(self):
         class C:
             counter = 0
-            @staticmethod
-            def inc():
+            def __init__(self):
                 C.counter += 1
-                return C.counter
 
         afx = Artifax({
             'a': 42,
             'b': lambda a: math.pow(a, 5),
-            'counter': lambda: C.inc(),
+            'counter': lambda: C(),
         })
-        result = afx.build(target='b')
+        result = afx.build(targets='b')
         self.assertEqual(result, 130691232)
 
         # 'counter' node should not have been evaluated
         # and should still be stale
         self.assertEqual(C.counter, 0)
 
-        result = afx.build()
-        print(result['counter']())
+        _ = afx.build()['counter']()
         self.assertEqual(C.counter, 1)
 
 if __name__ == '__main__':
