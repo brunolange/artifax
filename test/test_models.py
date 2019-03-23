@@ -127,34 +127,36 @@ class ModelTest(unittest.TestCase):
         self.assertGreater(index('msg'), index('A'))
 
     def test_targeted_build(self):
+        afx = Artifax({
+            'name': 'World',
+            'greeting': lambda name: 'Hello, {}!'.format(name)
+        })
+        greeting = afx.build(target='greeting')
+        self.assertEqual(greeting, 'Hello, World!')
+
+    def test_stale(self):
         class C:
             counter = 0
-            def __init__(self):
+            @staticmethod
+            def inc():
                 C.counter += 1
-        class Exp:
-            counter = 0
-            def __init__(self):
-                Exp.counter += 1
+                return C.counter
+
         afx = Artifax({
             'a': 42,
-            'b': lambda a, exp: math.pow(a, exp()),
-            'c': lambda: C(),
-            'exp': lambda: Exp().counter + 4
+            'b': lambda a: math.pow(a, 5),
+            'counter': lambda: C.inc(),
         })
         result = afx.build(target='b')
-        # exp = 5, b = 42^5
         self.assertEqual(result, 130691232)
-        # C should not have been instantiated
+
+        # 'counter' node should not have been evaluated
+        # and should still be stale
         self.assertEqual(C.counter, 0)
-        result = afx.build(target='b')
-        # no updates, all nodes are fresh
-        self.assertEqual(result, 130691232)
-        self.assertEqual(C.counter, 0)
-        # trigger new exp: 6
-        result = afx.build(target='exp')
-        self.assertEqual(result(), 6)
-        _ = afx.build()
-        self.assertEqual(Exp.counter, 2)
+
+        result = afx.build()
+        print(result['counter']())
+        self.assertEqual(C.counter, 1)
 
 if __name__ == '__main__':
     unittest.main()

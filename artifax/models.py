@@ -72,7 +72,7 @@ class Artifax:
                 )
             )
         }, allow_partial_functions=True)
-        self._stale = set()
+        self._stale = {k for k in self._stale if k not in afx['nodes']}
         self._result.update(afx['result'])
         self._result.sorting(afx['nodes'])
         return self._result if target is None else self._result[target]
