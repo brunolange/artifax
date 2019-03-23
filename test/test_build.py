@@ -85,6 +85,7 @@ class BuildTest(unittest.TestCase):
             '_underscore_key': lambda bang: '_{}_'.format(bang),
         }
         result = build(artifacts)
+        self.assertEqual(result['key-with-dash'], 'a value')
         self.assertEqual(result['bang'], 'a value!')
         self.assertEqual(result['_underscore_key'], '_a value!_')
 
