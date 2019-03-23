@@ -6,7 +6,7 @@ from artifax.exceptions import UnresolvedDependencyError
 
 class ModelTest(unittest.TestCase):
 
-    def test_artifax_add(self):
+    def test_add(self):
         afx = Artifax()
         afx.set('a', 42)
         self.assertTrue(len(afx) == 1)
@@ -18,14 +18,14 @@ class ModelTest(unittest.TestCase):
 
         self.assertFalse('y' in afx)
 
-    def test_artifax_pop(self):
+    def test_pop(self):
         afx = Artifax()
         afx.set('c', 'C')
         c = afx.pop('c')
         self.assertTrue(len(afx) == 0)
         self.assertEqual(c, 'C')
 
-    def test_artifax_build(self):
+    def test_build(self):
         obj = object()
         afx = Artifax({
             'int': 42,
@@ -57,7 +57,7 @@ class ModelTest(unittest.TestCase):
         result = afx.build(allow_partial_functions=True)
         self.assertIsInstance(result['b'], partial)
 
-    def test_artifax_incremental_build(self):
+    def test_incremental_build(self):
         class ExpensiveObject:
             def __init__(self):
                 self.counter = 0
