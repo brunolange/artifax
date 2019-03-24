@@ -1,5 +1,6 @@
 from . import builder
 from . import utils
+from functools import reduce
 
 def fluent(cls, attr, *args):
     if args:
@@ -30,18 +31,17 @@ class Artifax:
             self._stale.remove(node)
         return self._artifacts.pop(node)
 
-    def _shipment(self, target=None):
-        shipment = {
+    def _shipment(self, targets=None):
+        nodes = self._stale if targets is None else set(reduce(
+            lambda acc, curr: acc + curr,
+            [self._dependencies(target) for target in targets] +
+            [[target for target in targets]],
+            []
+        ))
+        return {
             k: self._artifacts[k]
-            for k in self._stale
+            for k in nodes
         }
-        if target:
-            shipment = {
-                k: self._artifacts[k]
-                for k in self._dependencies(target) + [target]
-                if k in shipment
-            }
-        return shipment
 
     def _dependencies(self, node):
         def _moonwalk(node, graph, dependencies):
@@ -55,13 +55,17 @@ class Artifax:
         _moonwalk(node, graph, dependencies)
         return dependencies
 
-    def build(self, target=None, allow_partial_functions=None):
-        if target and target not in self:
-            raise KeyError(target)
-        afx = builder.build({
+    def build(self, targets=None, allow_partial_functions=None):
+        targets = (targets,) if isinstance(targets, str) else targets
+        if targets:
+            for target in targets:
+                if target not in self:
+                    raise KeyError(target)
+
+        build = builder.build({
             'ts': lambda _x: utils.topological_sort(_x),
             'tg': lambda _x: utils.to_graph(_x),
-            'shipment': self._shipment(target),
+            'shipment': self._shipment(targets),
             'nodes': lambda ts, tg, shipment: ts(tg(shipment)),
             'result': lambda shipment, nodes: builder.assemble(
                 shipment,
@@ -72,10 +76,18 @@ class Artifax:
                 )
             )
         }, allow_partial_functions=True)
-        self._stale = {k for k in self._stale if k not in afx['nodes']}
-        self._result.update(afx['result'])
-        self._result.sorting(afx['nodes'])
-        return self._result if target is None else self._result[target]
+
+        self._stale = {k for k in self._stale if k not in build['nodes']}
+        self._result.update(build['result'])
+        self._result.sorting(build['nodes'])
+
+        if targets is None:
+            return self._result
+
+        payload = tuple([
+            self._result[target] for target in targets
+        ])
+        return payload if len(payload) > 1 else payload[0]
 
     def __len__(self):
         return len(self._artifacts)

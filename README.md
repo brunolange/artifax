@@ -138,28 +138,27 @@ your computation graph should be built. Instead of returning the usual dictionar
 targeted builds return the value associated with the target node.
 
 ```python
-terminal_node_value = afx.build(target='terminal_node')
+terminal_node_value = afx.build(targets='terminal_node')
+some_node, another_node = afx.build(targets=('node1', 'node2'))
+
 ```
 
 Targeted builds only evaluate depencies for the target node and the target node itself.
 Any other nodes in the computation graph do not get evaluated.
 
 ```python
-import math
 from artifax import Artifax
-class C:
-    counter = 0
-    def __init__(self):
-        C.counter += 1
 afx = Artifax({
-    'a': 42,
-    'b': lambda a: math.pow(a, 2),
-    'c': lambda: C(),
+    'name': 'World',
+    'punctuation': '',
+    'greeting': lambda name, punctuation: 'Hello, {}{}'.format(name, punctuation),
 })
-print(result, type(result)) # 1764.0 <class 'float'>
-print(C.counter) # 0
-_ = afx.build()
-print(C.counter) # 1
+greeting = afx.build(targets='greeting')
+print(greeting) # prints "Hello, World"
+afx.set('punctuation', '!')
+greeting, punctuation = afx.build(targets=('greeting', 'punctuation'))
+print(greeting) # prints "Hello, World!"
+print('Cool beans{}'.format(punctuation)) # prints "Cool beans!"
 ```
 
 Targeted builds might be an efficient way of retrieving certain nodes
