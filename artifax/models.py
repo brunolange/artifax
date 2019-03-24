@@ -32,23 +32,16 @@ class Artifax:
         return self._artifacts.pop(node)
 
     def _shipment(self, targets=None):
-        shipment = {
+        nodes = self._stale if targets is None else set(reduce(
+            lambda acc, curr: acc + curr,
+            [self._dependencies(target) for target in targets] +
+            [[target for target in targets]],
+            []
+        ))
+        return {
             k: self._artifacts[k]
-            for k in self._stale
+            for k in nodes
         }
-        if targets:
-            dependencies = set(reduce(
-                lambda acc, curr: acc + curr,
-                [self._dependencies(target) for target in targets] +
-                [[target for target in targets]],
-                []
-            ))
-            shipment = {
-                k: self._artifacts[k]
-                for k in dependencies
-                if k in shipment
-            }
-        return shipment
 
     def _dependencies(self, node):
         def _moonwalk(node, graph, dependencies):

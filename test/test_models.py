@@ -129,10 +129,21 @@ class ModelTest(unittest.TestCase):
     def test_targeted_build(self):
         afx = Artifax({
             'name': 'World',
-            'greeting': lambda name: 'Hello, {}!'.format(name)
+            'punctuation': '',
+            'greeting': lambda name, punctuation: 'Hello, {}{}'.format(name, punctuation),
         })
-        greeting = afx.build(target='greeting')
+        greeting = afx.build(targets='greeting')
+        self.assertEqual(greeting, 'Hello, World')
+
+        afx.set('punctuation', '!')
+        greeting, punctuation = afx.build(targets=('greeting', 'punctuation'))
         self.assertEqual(greeting, 'Hello, World!')
+        self.assertEqual(punctuation, '!')
+
+        result = afx.build()
+        self.assertEqual(result['greeting'], 'Hello, World!')
+        self.assertEqual(result['name'], 'World')
+        self.assertEqual(result['punctuation'], '!')
 
     def test_stale(self):
         class C:
