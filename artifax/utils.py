@@ -41,3 +41,21 @@ def topological_sort(graph):
         node = unmarked.pop()
         _visit(node, temp, perm, tlist)
     return tlist
+
+class At:
+    """ The At class is but a wrapper for a tuple-like constructor
+    that can be used to assign node values in a compact way without
+    using lambda expressions.
+
+    For example:
+    {'a': lambda b, c: some_function(c, b)}
+
+    can be rewritten as
+
+    {'a': At('c', 'b', some_function)}
+    """
+    def __init__(self, *args):
+        if not args:
+            raise ValueError('expected at least two arguments to At constructor')
+        self.args = args[:-1]
+        self.value = args[-1]
