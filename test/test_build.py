@@ -1,7 +1,7 @@
 import unittest
 from functools import partial
 import math
-from artifax import build
+from artifax import build, At
 from artifax.exceptions import UnresolvedDependencyError
 
 class BuildTest(unittest.TestCase):
@@ -88,6 +88,30 @@ class BuildTest(unittest.TestCase):
         self.assertEqual(result['key-with-dash'], 'a value')
         self.assertEqual(result['bang'], 'a value!')
         self.assertEqual(result['_underscore_key'], '_a value!_')
+
+    def test_at_constructor(self):
+        def subtract(p, q):
+            return p - q
+
+        result = build({
+            'p': 3,
+            'q': 5,
+            'p - q': subtract,
+            'q - p': lambda p, q: subtract(q, p),
+        })
+
+        self.assertEqual(result['p - q'], -2)
+        self.assertEqual(result['q - p'], 2)
+
+        result = build({
+            'a': -11,
+            'b': 7.5,
+            'a - b': At('a', 'b', subtract),
+            'b - a': At('b', 'a', subtract),
+        })
+
+        self.assertEqual(result['a - b'], -18.5)
+        self.assertEqual(result['b - a'], 18.5)
 
 if __name__ == '__main__':
     unittest.main()
