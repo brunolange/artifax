@@ -41,3 +41,8 @@ def topological_sort(graph):
         node = unmarked.pop()
         _visit(node, temp, perm, tlist)
     return tlist
+
+class At:
+    def __init__(self, *args):
+        self.args = args[:-1]
+        self.value = args[-1]

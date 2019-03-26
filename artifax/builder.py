@@ -3,15 +3,19 @@ from . import utils
 from . import exceptions
 
 _apply = lambda v, *args: (
-    v(*args) if callable(v) and len(args) and len(utils.arglist(v)) == len(args) else
-    partial(v, *args) if callable(v) else
+    v(*args)            if callable(v) and len(args) and len(utils.arglist(v)) == len(args) else
+    partial(v, *args)   if callable(v) else
     v
 )
 
 def assemble(artifacts, nodes, allow_partial_functions=False):
     def _reducer(result, node):
         value = result[node]
-        keys = [utils.unescape(a) for a in utils.arglist(value)]
+        args = utils.arglist(value)
+        if isinstance(value, utils.At):
+            args = value.args
+            value = value.value
+        keys = [utils.unescape(a) for a in args]
         if not allow_partial_functions:
             unresolved = [key for key in keys if key not in result]
             if unresolved:
