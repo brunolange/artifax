@@ -67,11 +67,14 @@ In addition to the `build` function, artifacts can be built by `Artifax` class
 instances.
 
 ```python
-from artifax import Artifax
+from artifax import Artifax, At
+
+def double(x):
+    return x*2
 
 afx = Artifax()
 afx.set('a', 42)
-afx.set('b', lambda a: a*2)
+afx.set('b', At('a', double))
 afx.set('c', lambda b: -b)
 
 print(len(afx)) # prints 3
