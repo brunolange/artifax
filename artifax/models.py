@@ -1,6 +1,6 @@
+from functools import reduce
 from . import builder
 from . import utils
-from functools import reduce
 
 def fluent(cls, attr, *args):
     if args:
@@ -9,7 +9,9 @@ def fluent(cls, attr, *args):
     return getattr(cls, attr)
 
 class Artifax:
-    def __init__(self, dic={}, allow_partial_functions=False):
+    def __init__(self, dic=None, allow_partial_functions=False):
+        if dic is None:
+            dic = {}
         self._artifacts = dic.copy()
         self._result = Result()
         self._stale = set(list(self._artifacts.keys()))

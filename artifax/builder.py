@@ -2,8 +2,8 @@ from functools import reduce, partial
 from . import utils
 from .exceptions import UnresolvedDependencyError
 
-_apply = lambda v, *args: (
-    v(*args)            if callable(v) and len(args) and len(utils.arglist(v)) == len(args) else
+apply = lambda v, *args: (
+    v(*args)            if callable(v) and args and len(utils.arglist(v)) == len(args) else
     partial(v, *args)   if callable(v) else
     v
 )
@@ -13,15 +13,15 @@ def assemble(artifacts, nodes, allow_partial_functions=False):
         value = result[node]
         args = utils.arglist(value)
         if isinstance(value, utils.At):
-            args = value.args
-            value = value.value
+            args = value.args()
+            value = value.value()
         keys = [utils.unescape(a) for a in args]
         if not allow_partial_functions:
             unresolved = [key for key in keys if key not in result]
             if unresolved:
                 raise UnresolvedDependencyError("Cannot resolve {}".format(unresolved))
         args = [result[key] for key in keys if key in result]
-        result[node] = _apply(value, *args)
+        result[node] = apply(value, *args)
         return result
     return reduce(_reducer, nodes, artifacts.copy())
 

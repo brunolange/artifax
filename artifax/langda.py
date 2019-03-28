@@ -1,16 +1,16 @@
 from collections.abc import Iterable
 
-def each(xs, accept, *args, **kwargs):
-    if not isinstance(xs, Iterable):
+def each(iterable, accept, *args, **kwargs):
+    if not isinstance(iterable, Iterable):
         raise ValueError('need an iterable')
     if not callable(accept):
         raise ValueError('need a callable')
-    for x in xs:
-        if isinstance(xs, dict):
-            _args = (x, xs[x])
-        elif isinstance(x, tuple):
-            _args = x
+    for item in iterable:
+        if isinstance(iterable, dict):
+            _args = (item, iterable[item])
+        elif isinstance(item, tuple):
+            _args = item
         else:
-            _args = (x,)
+            _args = (item,)
         _args += args
         accept(*_args, **kwargs)
