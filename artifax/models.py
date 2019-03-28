@@ -163,7 +163,7 @@ class Artifax:
         return payload if len(payload) > 1 else payload[0]
 
     def branes(self):
-        return utils.branes(self._graph))
+        return utils.branes(self._graph)
 
     def number_of_edges(self):
         return sum([len(v) for v in self._graph.values()])
