@@ -112,6 +112,3 @@ class BuildTest(unittest.TestCase):
 
         self.assertEqual(result['a - b'], -18.5)
         self.assertEqual(result['b - a'], 18.5)
-
-if __name__ == '__main__':
-    unittest.main()

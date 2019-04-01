@@ -165,6 +165,3 @@ class ModelTest(unittest.TestCase):
 
         _ = afx.build()['counter']()
         self.assertEqual(C.counter, 1)
-
-if __name__ == '__main__':
-    unittest.main()
