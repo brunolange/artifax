@@ -12,8 +12,7 @@ def tex(artifacts):
             pairs.append((key, value))
         return pairs
 
-    path = lambda *args: os.path.join(*args)
-    with open(path(os.path.dirname(__file__), 'templates', 'dag.tex.j2')) as handle:
+    with open(os.path.join(os.path.dirname(__file__), 'templates', 'dag.tex.j2')) as handle:
         template = Template(handle.read())
 
     nodes = list(artifacts.keys())

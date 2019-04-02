@@ -23,7 +23,11 @@ def to_graph(artifacts):
     }
 
 def topological_sort(graph):
-    """ returns a topological sorting of nodes from the given graph """
+    """ returns a topological sorting of nodes from the given graph
+
+    Throws artifax.CircularDependencyError
+    if graph is not a Direct Acyclic Graph (DAG)
+    """
     def _visit(node, temp, perm, tlist):
         if node in perm:
             return
