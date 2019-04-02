@@ -14,3 +14,5 @@ def each(iterable, accept, *args, **kwargs):
             _args = (item,)
         _args += args
         accept(*_args, **kwargs)
+
+flip = lambda f: lambda x: lambda y: f(y, x)
