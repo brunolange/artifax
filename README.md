@@ -146,7 +146,7 @@ some_node, another_node = afx.build(targets=('node1', 'node2'))
 
 ```
 
-Targeted builds only evaluate depencies for the target node and the target node itself.
+Targeted builds only evaluate dependencies for the target node and the target node itself.
 Any other nodes in the computation graph do not get evaluated.
 
 ```python
