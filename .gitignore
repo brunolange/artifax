@@ -4,3 +4,5 @@ dist/
 *.egg-info
 .vscode/
 venv*
+*.aux
+*.fdb_latexmk
