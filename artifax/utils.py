@@ -65,7 +65,7 @@ class At:
     {'a': At('c', 'b', some_function)}
     """
     def __init__(self, *args):
-        if not args:
+        if len(args) < 2:
             raise ValueError('At constructor requires at least expected two arguments')
         self._args = args[:-1]
         self._value = args[-1]
