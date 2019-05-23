@@ -1,4 +1,5 @@
 from functools import reduce
+import operator
 from . import builder
 from . import utils
 
@@ -94,25 +95,27 @@ class Artifax:
         return self._artifacts.pop(node)
 
     def _shipment(self, targets=None):
-        nodes = self._stale if targets is None else set(reduce(
-            lambda acc, curr: acc + curr,
-            [self._dependencies(target) for target in targets] +
-            [[target for target in targets]],
-            []
-        ))
+        graph = utils.to_graph(self._artifacts)
+        nodes = (
+            self._stale if targets is None else
+            set(reduce(
+                operator.iconcat,
+                [self._dependencies(graph, t) for t in targets] + [list(targets)],
+                []
+            ))
+        )
         return {
             k: self._artifacts[k]
             for k in nodes
         }
 
-    def _dependencies(self, node):
+    def _dependencies(self, graph, node):
         def _moonwalk(node, graph, dependencies):
             for vertex, neighbors in graph.items():
                 if node in neighbors:
                     dependencies.append(vertex)
                     _moonwalk(vertex, graph, dependencies)
 
-        graph = utils.to_graph(self._artifacts)
         dependencies = []
         _moonwalk(node, graph, dependencies)
         return dependencies
