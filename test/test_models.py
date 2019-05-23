@@ -3,6 +3,7 @@ import math
 from functools import partial
 from artifax import Artifax
 from artifax.exceptions import UnresolvedDependencyError
+from artifax.utils import At
 
 class ModelTest(unittest.TestCase):
 
@@ -165,3 +166,18 @@ class ModelTest(unittest.TestCase):
 
         _ = afx.build()['counter']()
         self.assertEqual(C.counter, 1)
+
+    def test_at_constructor(self):
+        def subtract(p, q):
+            return p - q
+
+        afx = Artifax({
+            'ab': At('a', 'b', subtract),
+            'ba': At('b', 'a', subtract),
+            'a': -11,
+            'b': 7.5,
+        })
+
+        ab, ba = afx.build(targets=('ab', 'ba'))
+        self.assertEqual(ab, -18.5)
+        self.assertEqual(ba, 18.5)
