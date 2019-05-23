@@ -9,11 +9,71 @@ def fluent(cls, attr, *args):
     return getattr(cls, attr)
 
 class Artifax:
+    class Result:
+        """ The Result class acts as an augmented dictionary to
+        hold the artifax build products and any additional information
+        deemed necessary or interesting. """
+        def __init__(self, *args, **kwargs):
+            self._data = {}
+            self.update(*args, **kwargs)
+            self._sorting = []
+
+        def sorting(self, *args):
+            return fluent(self, '_sorting', *args)
+
+        def __setitem__(self, key, item):
+            self._data[key] = item
+
+        def __getitem__(self, key):
+            return self._data[key]
+
+        def __repr__(self):
+            return repr(self._data)
+
+        def __len__(self):
+            return len(self._data)
+
+        def __delitem__(self, key):
+            del self._data[key]
+
+        def clear(self):
+            return self._data.clear()
+
+        def copy(self):
+            return self._data.copy()
+
+        def has_key(self, k):
+            return k in self._data
+
+        def update(self, *args, **kwargs):
+            return self._data.update(*args, **kwargs)
+
+        def keys(self):
+            return self._data.keys()
+
+        def values(self):
+            return self._data.values()
+
+        def items(self):
+            return self._data.items()
+
+        def pop(self, *args):
+            return self._data.pop(*args)
+
+        def __cmp__(self, dict_):
+            return self._data == dict_
+
+        def __contains__(self, item):
+            return item in self._data
+
+        def __iter__(self):
+            return iter(self._data)
+
     def __init__(self, dic=None, allow_partial_functions=False):
         if dic is None:
             dic = {}
         self._artifacts = dic.copy()
-        self._result = Result()
+        self._result = Artifax.Result()
         self._stale = set(list(self._artifacts.keys()))
         self._allow_partial_functions = allow_partial_functions
 
@@ -96,63 +156,3 @@ class Artifax:
 
     def __contains__(self, node):
         return node in self._artifacts
-
-class Result():
-    """ The Result class acts as an augmented dictionary to
-    hold the artifax build products and any additional information
-    deemed necessary or interesting. """
-    def __init__(self, *args, **kwargs):
-        self._data = {}
-        self.update(*args, **kwargs)
-        self._sorting = []
-
-    def sorting(self, *args):
-        return fluent(self, '_sorting', *args)
-
-    def __setitem__(self, key, item):
-        self._data[key] = item
-
-    def __getitem__(self, key):
-        return self._data[key]
-
-    def __repr__(self):
-        return repr(self._data)
-
-    def __len__(self):
-        return len(self._data)
-
-    def __delitem__(self, key):
-        del self._data[key]
-
-    def clear(self):
-        return self._data.clear()
-
-    def copy(self):
-        return self._data.copy()
-
-    def has_key(self, k):
-        return k in self._data
-
-    def update(self, *args, **kwargs):
-        return self._data.update(*args, **kwargs)
-
-    def keys(self):
-        return self._data.keys()
-
-    def values(self):
-        return self._data.values()
-
-    def items(self):
-        return self._data.items()
-
-    def pop(self, *args):
-        return self._data.pop(*args)
-
-    def __cmp__(self, dict_):
-        return self._data == dict_
-
-    def __contains__(self, item):
-        return item in self._data
-
-    def __iter__(self):
-        return iter(self._data)
