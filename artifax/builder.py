@@ -9,21 +9,32 @@ apply = lambda v, *args: (
 )
 
 def assemble(artifacts, nodes, allow_partial_functions=False):
-    def _reducer(result, node):
-        value = result[node]
+    def _resolve(node, store):
+        value = store[node]
         args = utils.arglist(value)
         if isinstance(value, utils.At):
             args = value.args()
             value = value.value()
         keys = [utils.unescape(a) for a in args]
-        if not allow_partial_functions:
-            unresolved = [key for key in keys if key not in result]
-            if unresolved:
-                raise UnresolvedDependencyError("Cannot resolve {}".format(unresolved))
-        args = [result[key] for key in keys if key in result]
-        result[node] = apply(value, *args)
-        return result
-    return reduce(_reducer, nodes, artifacts.copy())
+        args = [store[key] for key in keys if key in store]
+        unresolved = [key for key in keys if key not in store]
+        return apply(value, *args), unresolved
+
+    def _reducer(store, node, graph, resolved):
+        store[node], unresolved = _resolve(node, store)
+        if not allow_partial_functions and unresolved:
+            raise UnresolvedDependencyError("Cannot resolve {}".format(unresolved))
+
+        return store
+
+    resolved = set()
+    graph = utils.to_graph(artifacts)
+
+    return reduce(
+        lambda store, node: _reducer(store, node, graph, resolved),
+        nodes,
+        artifacts.copy()
+    )
 
 def build(artifacts, allow_partial_functions=False):
     graph = utils.to_graph(artifacts)
