@@ -106,6 +106,22 @@ class ModelTest(unittest.TestCase):
             'opa': lambda belt: 'ice @{}'.format(belt)
         })
         self.assertEqual(afx.branes(), set(['earth', 'mars', 'belt']))
+        _ = afx.build()
+
+    def test_multiprocessing(self):
+        afx = Artifax({
+            'p1': None,
+            'p2': None,
+            'c1': lambda p1: None,
+            'c2': lambda p1: None,
+            'c3': lambda p2: None,
+            'c4': lambda p2: None,
+            'c5': lambda p1, p2, c2, c3: None,
+            'c6': lambda c1: None,
+            'F':  lambda c1, c2, c3, c4, c5: None,
+        })
+
+        _ = afx.build()
 
     def test_in_operator(self):
         afx = Artifax({
