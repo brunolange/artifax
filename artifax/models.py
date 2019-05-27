@@ -135,24 +135,21 @@ class Artifax:
                 if target not in self:
                     raise KeyError(target)
 
-        build = builder.build({
-            'ts': lambda _x: utils.topological_sort(_x),
-            'tg': lambda _x: utils.to_graph(_x),
-            'shipment': self._shipment(targets),
-            'nodes': lambda ts, tg, shipment: ts(tg(shipment)),
-            'result': lambda shipment, nodes: builder.assemble(
-                shipment,
-                nodes,
-                allow_partial_functions=(
-                    allow_partial_functions if allow_partial_functions is not None else
-                    self._allow_partial_functions
-                )
+        shipment = self._shipment(targets)
+        graph = utils.to_graph(shipment)
+        nodes = utils.topological_sort(graph)
+        result = builder.assemble(
+            shipment,
+            nodes,
+            allow_partial_functions=(
+                allow_partial_functions if allow_partial_functions is not None else
+                self._allow_partial_functions
             )
-        }, allow_partial_functions=True)
+        )
 
-        self._stale = {k for k in self._stale if k not in build['nodes']}
-        self._result.update(build['result'])
-        self._result.sorting(build['nodes'])
+        self._stale = {k for k in self._stale if k not in nodes}
+        self._result.update(result)
+        self._result.sorting(nodes)
 
         if targets is None:
             return self._result

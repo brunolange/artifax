@@ -39,4 +39,9 @@ def assemble(artifacts, nodes, allow_partial_functions=False):
 def build(artifacts, allow_partial_functions=False):
     graph = utils.to_graph(artifacts)
     nodes = utils.topological_sort(graph)
-    return assemble(artifacts, nodes, allow_partial_functions)
+    graph = utils.to_graph(artifacts)
+    return assemble(
+        artifacts,
+        nodes,
+        allow_partial_functions=allow_partial_functions
+    )
