@@ -136,20 +136,16 @@ class Artifax:
                     raise KeyError(target)
 
         shipment = self._shipment(targets)
-        graph = utils.to_graph(shipment)
-        nodes = utils.topological_sort(graph)
-        result = builder.assemble(
+        result = builder.build(
             shipment,
-            nodes,
             allow_partial_functions=(
                 allow_partial_functions if allow_partial_functions is not None else
                 self._allow_partial_functions
             )
         )
 
-        self._stale = {k for k in self._stale if k not in nodes}
+        self._stale = {k for k in self._stale if k not in shipment}
         self._result.update(result)
-        self._result.sorting(nodes)
 
         if targets is None:
             return self._result

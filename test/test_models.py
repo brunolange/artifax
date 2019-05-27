@@ -78,28 +78,23 @@ class ModelTest(unittest.TestCase):
         })
         result = afx.build()
         self.assertEqual(exo.counter, 1)
-        self.assertEqual(len(result.sorting()), len(afx))
 
         afx.set('p', (1,1))
         result = afx.build()
         self.assertEqual(exo.counter, 1)
-        self.assertListEqual(result.sorting(), ['p'])
 
         afx.set('q', (0,0))
         result = afx.build()
         self.assertEqual(exo.counter, 2)
-        self.assertListEqual(result.sorting(), ['q', 'exo'])
 
         afx.set('new', 'hello')
         result = afx.build()
         self.assertEqual(result['new'], 'hello')
         self.assertEqual(exo.counter, 2)
-        self.assertEqual(result.sorting(), ['new'])
 
         afx.pop('new')
         result = afx.build()
         self.assertEqual(exo.counter, 2)
-        self.assertEqual(result.sorting(), [])
 
     def test_branes(self):
         afx = Artifax({
@@ -124,23 +119,6 @@ class ModelTest(unittest.TestCase):
 
         afx.set('q', (1,2))
         self.assertTrue('q' in afx)
-
-    def test_result_info(self):
-        afx = Artifax({
-            'A': 42,
-            'B': lambda: 7,
-            'C': lambda: 10,
-            'AB': lambda A, B: A + B(),
-            'C minus B': lambda B, C: C() - B(),
-            'greet': 'Hello',
-            'msg': lambda greet, A: '{} World! The answer is {}.'.format(greet, A),
-        })
-        result = afx.build()
-        sorting = result.sorting()
-        index = lambda k: sorting.index(k)
-        self.assertLess(index('A'), index('AB'))
-        self.assertGreater(index('msg'), index('greet'))
-        self.assertGreater(index('msg'), index('A'))
 
     def test_targeted_build(self):
         afx = Artifax({

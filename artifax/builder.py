@@ -1,6 +1,7 @@
 from functools import reduce, partial
 from . import utils
 from .exceptions import UnresolvedDependencyError
+from collections import deque
 
 apply = lambda v, *args: (
     v(*args)            if callable(v) and args and len(utils.arglist(v)) == len(args) else
@@ -8,7 +9,7 @@ apply = lambda v, *args: (
     v
 )
 
-def assemble(artifacts, nodes, allow_partial_functions=False):
+def build(artifacts, allow_partial_functions=False):
     def _resolve(node, store):
         value = store[node]
         args = utils.arglist(value)
@@ -20,28 +21,19 @@ def assemble(artifacts, nodes, allow_partial_functions=False):
         unresolved = [key for key in keys if key not in store]
         return apply(value, *args), unresolved
 
-    def _reducer(store, node, graph, resolved):
-        store[node], unresolved = _resolve(node, store)
+    done = set()
+    result = {}
+    graph = utils.to_graph(artifacts)
+    frontier = deque(utils.branes(graph))
+    while frontier:
+        node = frontier.popleft()
+        result[node], unresolved = _resolve(node, artifacts)
+        done.add(node)
         if not allow_partial_functions and unresolved:
             raise UnresolvedDependencyError("Cannot resolve {}".format(unresolved))
+        for nxt in graph[node]:
+            pending = set(k for k, v in graph.items() if nxt in v and k not in done)
+            if not pending:
+                frontier.append(nxt)
 
-        return store
-
-    resolved = set()
-    graph = utils.to_graph(artifacts)
-
-    return reduce(
-        lambda store, node: _reducer(store, node, graph, resolved),
-        nodes,
-        artifacts.copy()
-    )
-
-def build(artifacts, allow_partial_functions=False):
-    graph = utils.to_graph(artifacts)
-    nodes = utils.topological_sort(graph)
-    graph = utils.to_graph(artifacts)
-    return assemble(
-        artifacts,
-        nodes,
-        allow_partial_functions=allow_partial_functions
-    )
+    return result
