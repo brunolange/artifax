@@ -9,18 +9,18 @@ apply = lambda v, *args: (
     v
 )
 
-def build(artifacts, allow_partial_functions=False):
-    def _resolve(node, store):
-        value = store[node]
-        args = utils.arglist(value)
-        if isinstance(value, utils.At):
-            args = value.args()
-            value = value.value()
-        keys = [utils.unescape(a) for a in args]
-        args = [store[key] for key in keys if key in store]
-        unresolved = [key for key in keys if key not in store]
-        return apply(value, *args), unresolved
+def _resolve(node, store):
+    value = store[node]
+    args = utils.arglist(value)
+    if isinstance(value, utils.At):
+        args = value.args()
+        value = value.value()
+    keys = [utils.unescape(a) for a in args]
+    args = [store[key] for key in keys if key in store]
+    unresolved = [key for key in keys if key not in store]
+    return apply(value, *args), unresolved
 
+def build(artifacts, allow_partial_functions=False):
     done = set()
     result = {}
     graph = utils.to_graph(artifacts)
