@@ -110,9 +110,9 @@ class ModelTest(unittest.TestCase):
 
     def test_multiprocessing(self):
         afx = Artifax({
-            'p1': None,
-            'p2': None,
-            'c1': lambda p1: None,
+            'p1': 'p1',
+            'p2': 'p2',
+            'c1': lambda p1: 'c1 after {}'.format(p1),
             'c2': lambda p1: None,
             'c3': lambda p2: None,
             'c4': lambda p2: None,
@@ -121,7 +121,8 @@ class ModelTest(unittest.TestCase):
             'F':  lambda c1, c2, c3, c4, c5: None,
         })
 
-        _ = afx.build()
+        c1 = afx.build(processes=4, targets=('c1',))
+        self.assertEqual(c1, 'c1 after p1')
 
     def test_in_operator(self):
         afx = Artifax({
