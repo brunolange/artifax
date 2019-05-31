@@ -22,14 +22,15 @@ def _resolve(node, store):
     unresolved = [key for key in keys if key not in store]
     return apply(value, *args), unresolved
 
-def build(artifacts, allow_partial_functions=False, processes=None):
-    callback = (
-        _build if not processes else
-        partial(_build_processes, processes)
-    )
-    return callback(artifacts, allow_partial_functions)
+def build(artifacts, **kwargs):
+    if 'processes' in kwargs and kwargs['processes']:
+        callback = _build_processes
+    else:
+        callback = _build
+        kwargs.pop('processes', None)
+    return callback(artifacts, **kwargs)
 
-def _build(artifacts, allow_partial_functions):
+def _build(artifacts, allow_partial_functions=False):
     done = set()
     result = {}
     graph = utils.to_graph(artifacts)
@@ -47,17 +48,23 @@ def _build(artifacts, allow_partial_functions):
 
     return result
 
-def _build_processes(processes, artifacts, allow_partial_functions):
+def _build_processes(artifacts, processes=4, allow_partial_functions=False):
     done = set()
     result = {}
     graph = utils.to_graph(artifacts)
     frontier = set(utils.branes(graph))
     pool = mp.Pool(processes=processes)
     while frontier:
-        batch = {
-            node: pool.apply(_resolve, args=(node, artifacts))
-            for node in frontier
-        }
+        if len(frontier) > 1:
+            batch = {
+                node: pool.apply(_resolve, args=(node, artifacts))
+                for node in frontier
+            }
+        else:
+            batch = {
+                node: _resolve(node, artifacts)
+                for node in frontier
+            }
         for node, (payload, unresolved) in batch.items():
             if not allow_partial_functions and unresolved:
                 raise UnresolvedDependencyError("Cannot resolve {}".format(unresolved))
