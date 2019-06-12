@@ -55,16 +55,13 @@ def _build_processes(artifacts, processes=4, allow_partial_functions=False):
     frontier = set(utils.branes(graph))
     pool = mp.Pool(processes=processes)
     while frontier:
-        if len(frontier) > 1:
-            batch = {
-                node: pool.apply(_resolve, args=(node, artifacts))
-                for node in frontier
-            }
-        else:
-            batch = {
-                node: _resolve(node, artifacts)
-                for node in frontier
-            }
+        batch = {
+            node: pool.apply(_resolve, args=(node, artifacts))
+            for node in frontier
+        } if len(frontier) > 1 else {
+            node: _resolve(node, artifacts)
+            for node in frontier
+        }
         for node, (payload, unresolved) in batch.items():
             if not allow_partial_functions and unresolved:
                 raise UnresolvedDependencyError("Cannot resolve {}".format(unresolved))
