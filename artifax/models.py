@@ -128,7 +128,7 @@ class Artifax:
         _moonwalk(node, self._graph, dependencies)
         return dependencies
 
-    def build(self, targets=None, allow_partial_functions=None, processes=None):
+    def build(self, targets=None, allow_partial_functions=None, **kwargs):
         targets = (targets,) if isinstance(targets, str) else targets
         if targets:
             for target in targets:
@@ -142,7 +142,7 @@ class Artifax:
                 allow_partial_functions if allow_partial_functions is not None else
                 self._allow_partial_functions
             ),
-            processes=processes
+            **kwargs
         )
 
         self._stale = {k for k in self._stale if k not in shipment}

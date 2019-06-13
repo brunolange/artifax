@@ -121,7 +121,7 @@ class ModelTest(unittest.TestCase):
             'F':  lambda c1, c2, c3, c4, c5: None,
         })
 
-        c1 = afx.build(processes=4, targets=('c1',))
+        c1 = afx.build(targets=('c1',))
         self.assertEqual(c1, 'c1 after p1')
 
     def test_in_operator(self):
