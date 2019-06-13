@@ -10,11 +10,15 @@ class ModelTest(unittest.TestCase):
     def test_add(self):
         afx = Artifax()
         afx.set('a', 42)
-        self.assertTrue(len(afx) == 1)
+        self.assertEqual(len(afx), 1)
+        self.assertEqual(afx.number_of_nodes(), 1)
+        self.assertEqual(afx.number_of_edges(), 0)
         self.assertTrue('a' in afx)
 
         afx.set('x', lambda a: a/3.14)
-        self.assertTrue(len(afx) == 2)
+        self.assertEqual(len(afx), 2)
+        self.assertEqual(afx.number_of_nodes(), 2)
+        self.assertEqual(afx.number_of_edges(), 1)
         self.assertTrue('x' in afx)
 
         self.assertFalse('y' in afx)
@@ -74,28 +78,51 @@ class ModelTest(unittest.TestCase):
         })
         result = afx.build()
         self.assertEqual(exo.counter, 1)
-        self.assertEqual(len(result.sorting()), len(afx))
 
         afx.set('p', (1,1))
         result = afx.build()
         self.assertEqual(exo.counter, 1)
-        self.assertListEqual(result.sorting(), ['p'])
 
         afx.set('q', (0,0))
         result = afx.build()
         self.assertEqual(exo.counter, 2)
-        self.assertListEqual(result.sorting(), ['q', 'exo'])
 
         afx.set('new', 'hello')
         result = afx.build()
         self.assertEqual(result['new'], 'hello')
         self.assertEqual(exo.counter, 2)
-        self.assertEqual(result.sorting(), ['new'])
 
         afx.pop('new')
         result = afx.build()
         self.assertEqual(exo.counter, 2)
-        self.assertEqual(result.sorting(), [])
+
+    def test_branes(self):
+        afx = Artifax({
+            'earth': object(),
+            'un': lambda earth: 'dirt @{}'.format(earth),
+            'mars': object(),
+            'mcrn': lambda mars: 'dust @{}'.format(mars),
+            'belt': object(),
+            'opa': lambda belt: 'ice @{}'.format(belt)
+        })
+        self.assertEqual(afx.branes(), set(['earth', 'mars', 'belt']))
+        _ = afx.build()
+
+    def test_multiprocessing(self):
+        afx = Artifax({
+            'p1': 'p1',
+            'p2': 'p2',
+            'c1': lambda p1: 'c1 after {}'.format(p1),
+            'c2': lambda p1: None,
+            'c3': lambda p2: None,
+            'c4': lambda p2: None,
+            'c5': lambda p1, p2, c2, c3: None,
+            'c6': lambda c1: None,
+            'F':  lambda c1, c2, c3, c4, c5: None,
+        })
+
+        c1 = afx.build(targets=('c1',))
+        self.assertEqual(c1, 'c1 after p1')
 
     def test_in_operator(self):
         afx = Artifax({
@@ -109,23 +136,6 @@ class ModelTest(unittest.TestCase):
 
         afx.set('q', (1,2))
         self.assertTrue('q' in afx)
-
-    def test_result_info(self):
-        afx = Artifax({
-            'A': 42,
-            'B': lambda: 7,
-            'C': lambda: 10,
-            'AB': lambda A, B: A + B(),
-            'C minus B': lambda B, C: C() - B(),
-            'greet': 'Hello',
-            'msg': lambda greet, A: '{} World! The answer is {}.'.format(greet, A),
-        })
-        result = afx.build()
-        sorting = result.sorting()
-        index = lambda k: sorting.index(k)
-        self.assertLess(index('A'), index('AB'))
-        self.assertGreater(index('msg'), index('greet'))
-        self.assertGreater(index('msg'), index('A'))
 
     def test_targeted_build(self):
         afx = Artifax({

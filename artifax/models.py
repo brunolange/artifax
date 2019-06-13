@@ -2,6 +2,7 @@ from functools import reduce
 import operator
 from . import builder
 from . import utils
+from . import langda as ft
 
 def fluent(cls, attr, *args):
     if args:
@@ -74,25 +75,32 @@ class Artifax:
         if dic is None:
             dic = {}
         self._artifacts = dic.copy()
+        self._graph = None
+        self._update_graph()
         self._result = Artifax.Result()
         self._stale = set(list(self._artifacts.keys()))
         self._allow_partial_functions = allow_partial_functions
 
+    def _update_graph(self):
+        self._graph = utils.to_graph(self._artifacts)
+
     def set(self, node, value):
         if node in self._artifacts:
-            self._revoke(node, utils.to_graph(self._artifacts))
+            self._revoke(node)
         self._stale.add(node)
         self._artifacts[node] = value
+        self._update_graph()
 
-    def _revoke(self, node, graph):
+    def _revoke(self, node):
         self._stale.add(node)
-        for neighbor in graph[node]:
-            self._revoke(neighbor, graph)
+        ft.each(self._graph[node], self._revoke)
 
     def pop(self, node):
         if node in self._stale:
             self._stale.remove(node)
-        return self._artifacts.pop(node)
+        item = self._artifacts.pop(node)
+        self._update_graph()
+        return item
 
     def _shipment(self, targets=None):
         graph = utils.to_graph(self._artifacts)
@@ -117,34 +125,28 @@ class Artifax:
                     _moonwalk(vertex, graph, dependencies)
 
         dependencies = []
-        _moonwalk(node, graph, dependencies)
+        _moonwalk(node, self._graph, dependencies)
         return dependencies
 
-    def build(self, targets=None, allow_partial_functions=None):
+    def build(self, targets=None, allow_partial_functions=None, **kwargs):
         targets = (targets,) if isinstance(targets, str) else targets
         if targets:
             for target in targets:
                 if target not in self:
                     raise KeyError(target)
 
-        build = builder.build({
-            'ts': lambda _x: utils.topological_sort(_x),
-            'tg': lambda _x: utils.to_graph(_x),
-            'shipment': self._shipment(targets),
-            'nodes': lambda ts, tg, shipment: ts(tg(shipment)),
-            'result': lambda shipment, nodes: builder.assemble(
-                shipment,
-                nodes,
-                allow_partial_functions=(
-                    allow_partial_functions if allow_partial_functions is not None else
-                    self._allow_partial_functions
-                )
-            )
-        }, allow_partial_functions=True)
+        shipment = self._shipment(targets)
+        result = builder.build(
+            shipment,
+            allow_partial_functions=(
+                allow_partial_functions if allow_partial_functions is not None else
+                self._allow_partial_functions
+            ),
+            **kwargs
+        )
 
-        self._stale = {k for k in self._stale if k not in build['nodes']}
-        self._result.update(build['result'])
-        self._result.sorting(build['nodes'])
+        self._stale = {k for k in self._stale if k not in shipment}
+        self._result.update(result)
 
         if targets is None:
             return self._result
@@ -154,8 +156,17 @@ class Artifax:
         ])
         return payload if len(payload) > 1 else payload[0]
 
-    def __len__(self):
+    def branes(self):
+        return utils.branes(self._graph)
+
+    def number_of_edges(self):
+        return sum([len(v) for v in self._graph.values()])
+
+    def number_of_nodes(self):
         return len(self._artifacts)
+
+    def __len__(self):
+        return self.number_of_nodes()
 
     def __contains__(self, node):
         return node in self._artifacts

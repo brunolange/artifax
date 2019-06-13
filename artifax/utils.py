@@ -52,6 +52,19 @@ def topological_sort(graph):
         _visit(node, temp, perm, tlist)
     return tlist
 
+def branes(graph):
+    def to_mask(mask, node, graph, key):
+        neighbors = graph[node]
+        for neighbor in neighbors:
+            mask[key[neighbor]] = 1
+        return mask
+
+    nodes = list(graph.keys())
+    key = {nodes[i]: i for i in range(len(nodes))}
+    mask = reduce(lambda m, n: to_mask(m, n, graph, key), nodes, [0]*len(nodes))
+
+    return set([nodes[i] for i in range(len(mask)) if mask[i] == 0])
+
 class At:
     """ The At class is but a wrapper for a tuple-like constructor
     that can be used to assign node values in a compact way without
