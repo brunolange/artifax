@@ -11,26 +11,27 @@ apply = lambda v, *args: (
     v
 )
 
-def _resolve(node, store):
-    value = store[node]
-    args = utils.arglist(value)
-    if isinstance(value, utils.At):
-        args = value.args()
-        value = value.value()
-    keys = [utils.unescape(a) for a in args]
-    args = [store[key] for key in keys if key in store]
-    unresolved = [key for key in keys if key not in store]
-    return apply(value, *args), unresolved
+def build(artifacts, solver='linear', **kwargs):
+    solvers = {
+        'linear':       _build_linear,
+        'bfs':          _build_bfs,
+        'bfs_parallel': _build_parallel_bfs,
+    }
+    return solvers[solver](artifacts, **kwargs)
 
-def build(artifacts, **kwargs):
-    if 'processes' in kwargs and kwargs['processes']:
-        callback = _build_processes
-    else:
-        callback = _build
-        kwargs.pop('processes', None)
-    return callback(artifacts, **kwargs)
+def _build_linear(artifacts, allow_partial_functions=False):
+    graph = utils.to_graph(artifacts)
+    nodes = utils.topological_sort(graph)
 
-def _build(artifacts, allow_partial_functions=False):
+    def _reducer(store, node):
+        store[node], unresolved = _resolve(node, store)
+        if not allow_partial_functions and unresolved:
+            raise UnresolvedDependencyError("Cannot resolve {}".format(unresolved))
+        return store
+
+    return reduce(_reducer, nodes, artifacts.copy())
+
+def _build_bfs(artifacts, allow_partial_functions=False):
     done = set()
     result = {}
     graph = utils.to_graph(artifacts)
@@ -48,7 +49,7 @@ def _build(artifacts, allow_partial_functions=False):
 
     return result
 
-def _build_processes(artifacts, processes=4, allow_partial_functions=False):
+def _build_parallel_bfs(artifacts, allow_partial_functions=False, processes=None):
     done = set()
     result = {}
     graph = utils.to_graph(artifacts)
@@ -69,4 +70,17 @@ def _build_processes(artifacts, processes=4, allow_partial_functions=False):
         done |= frontier
         frontier = set(reduce(operator.iconcat, [graph[n] for n in frontier], [])) - done
 
+    pool.close()
+
     return result
+
+def _resolve(node, store):
+    value = store[node]
+    args = utils.arglist(value)
+    if isinstance(value, utils.At):
+        args = value.args()
+        value = value.value()
+    keys = [utils.unescape(a) for a in args]
+    args = [store[key] for key in keys if key in store]
+    unresolved = [key for key in keys if key not in store]
+    return apply(value, *args), unresolved
