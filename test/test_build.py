@@ -1,6 +1,7 @@
 import unittest
 from functools import partial
 import math
+import json
 from artifax import build, At
 from artifax.exceptions import UnresolvedDependencyError
 
@@ -111,5 +112,29 @@ class BuildTest(unittest.TestCase):
             'b - a': At('b', 'a', subtract),
         })
 
+        self.assertEqual(result['a - b'], -18.5)
+        self.assertEqual(result['b - a'], 18.5)
+
+    def test_solvers(self):
+        def subtract(p, q):
+            return p - q
+
+        solvers = ['linear', 'bfs', 'bfs_parallel']
+        results = [build({
+            'a': -11,
+            'b': 7.5,
+            'a - b': At('a', 'b', subtract),
+            'b - a': At('b', 'a', subtract),
+        }, solver=solver) for solver in solvers]
+
+        # make sure we have as many results as there are solvers
+        self.assertEqual(len(results), len(solvers))
+
+        # serialize results and add them to set
+        # if results are the same, there should be only one element in the set
+        result_set = set([json.dumps(result, sort_keys=True) for result in results])
+        self.assertEqual(len(result_set), 1)
+
+        result = json.loads(next(iter(result_set)))
         self.assertEqual(result['a - b'], -18.5)
         self.assertEqual(result['b - a'], 18.5)
