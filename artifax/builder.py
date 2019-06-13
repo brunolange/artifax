@@ -4,6 +4,8 @@ from .exceptions import UnresolvedDependencyError
 from collections import deque
 import operator
 import pathos.multiprocessing as mp
+import time
+import os
 
 apply = lambda v, *args: (
     v(*args)            if callable(v) and args and len(utils.arglist(v)) == len(args) else
@@ -16,6 +18,7 @@ def build(artifacts, solver='linear', **kwargs):
         'linear':       _build_linear,
         'bfs':          _build_bfs,
         'bfs_parallel': _build_parallel_bfs,
+        'async':        _build_async
     }
     return solvers[solver](artifacts, **kwargs)
 
@@ -83,4 +86,65 @@ def _resolve(node, store):
     keys = [utils.unescape(a) for a in args]
     args = [store[key] for key in keys if key in store]
     unresolved = [key for key in keys if key not in store]
-    return apply(value, *args), unresolved
+    # print('@{}: Resolving node [{}]...'.format(os.getpid(), node))
+    # time.sleep(2)
+    out = apply(value, *args)
+    # print('@{}: Resolved node [{}]: {}'.format(os.getpid(), node, out))
+    return out, unresolved
+
+def _build_async(artifacts, allow_partial_functions=False, processes=None):
+    done = set()
+    result = {}
+    graph = utils.to_graph(artifacts)
+    frontier = set(utils.branes(graph))
+    pool = mp.Pool(processes=processes)
+
+    for node in frontier:
+        pool.apply_async(
+            _resolve,
+            args=(node, artifacts),
+            callback=partial(_handle_completion,
+                artifacts, graph, result, node, done,
+                allow_partial_functions=allow_partial_functions,
+            )
+        )
+
+    pool.close()
+    pool.join()
+
+    return result
+
+def _handle_completion(artifacts, graph, result, node, done, payload, **kwargs):
+    out, unresolved = payload
+    if not kwargs['allow_partial_functions'] and unresolved:
+        raise UnresolvedDependencyError("Cannot resolve {}".format(unresolved))
+
+    # print('@{}: Processed [{}]! Got [{}]'.format(os.getpid(), node, out))
+
+    result[node] = out
+
+    done.add(node)
+
+    batch = set()
+    for nxt in graph[node]:
+        pending = set(k for k, v in graph.items() if nxt in v and k not in done)
+        if not pending:
+            batch.add(nxt)
+
+    # print('@{}: next batch = {}'.format(os.getpid(), batch))
+    if not batch:
+        return
+
+    allow_partial_functions = kwargs['allow_partial_functions']
+    pool = mp.Pool()
+    for node in batch:
+        pool.apply_async(_resolve,
+            args=(node, artifacts),
+            callback=partial(_handle_completion,
+                artifacts, graph, result, node, done,
+                allow_partial_functions=allow_partial_functions,
+            )
+        )
+
+    pool.close()
+    pool.join()

@@ -119,7 +119,7 @@ class BuildTest(unittest.TestCase):
         def subtract(p, q):
             return p - q
 
-        solvers = ['linear', 'bfs', 'bfs_parallel']
+        solvers = ['linear', 'bfs', 'bfs_parallel', 'async']
         results = [build({
             'a': -11,
             'b': 7.5,
