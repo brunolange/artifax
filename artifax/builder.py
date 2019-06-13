@@ -86,10 +86,10 @@ def _resolve(node, store):
     keys = [utils.unescape(a) for a in args]
     args = [store[key] for key in keys if key in store]
     unresolved = [key for key in keys if key not in store]
-    # print('@{}: Resolving node [{}]...'.format(os.getpid(), node))
-    # time.sleep(2)
+    print('@{}: Resolving node [{}]...'.format(os.getpid(), node))
+    time.sleep(2)
     out = apply(value, *args)
-    # print('@{}: Resolved node [{}]: {}'.format(os.getpid(), node, out))
+    print('@{}: Resolved node [{}]: {}'.format(os.getpid(), node, out))
     return out, unresolved
 
 def _build_async(artifacts, allow_partial_functions=False, processes=None):
@@ -119,7 +119,7 @@ def _handle_completion(artifacts, graph, result, node, done, payload, **kwargs):
     if not kwargs['allow_partial_functions'] and unresolved:
         raise UnresolvedDependencyError("Cannot resolve {}".format(unresolved))
 
-    # print('@{}: Processed [{}]! Got [{}]'.format(os.getpid(), node, out))
+    print('@{}: Processed [{}]! Got [{}]'.format(os.getpid(), node, out))
 
     result[node] = out
 
@@ -131,18 +131,17 @@ def _handle_completion(artifacts, graph, result, node, done, payload, **kwargs):
         if not pending:
             batch.add(nxt)
 
-    # print('@{}: next batch = {}'.format(os.getpid(), batch))
+    print('@{}: next batch = {}'.format(os.getpid(), batch))
     if not batch:
         return
 
-    allow_partial_functions = kwargs['allow_partial_functions']
     pool = mp.Pool()
     for node in batch:
         pool.apply_async(_resolve,
             args=(node, artifacts),
             callback=partial(_handle_completion,
                 artifacts, graph, result, node, done,
-                allow_partial_functions=allow_partial_functions,
+                **kwargs
             )
         )
 
