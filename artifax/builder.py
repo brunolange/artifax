@@ -86,19 +86,26 @@ def _resolve(node, store):
     keys = [utils.unescape(a) for a in args]
     args = [store[key] for key in keys if key in store]
     unresolved = [key for key in keys if key not in store]
-    print('@{}: Resolving node [{}]...'.format(os.getpid(), node))
-    time.sleep(2)
-    out = apply(value, *args)
-    print('@{}: Resolved node [{}]: {}'.format(os.getpid(), node, out))
-    return out, unresolved
+    return apply(value, *args), unresolved
 
 def _build_async(artifacts, allow_partial_functions=False, processes=None):
+    graph = utils.to_graph(artifacts)
+    frontier = utils.branes(graph)
+
+    result = {}
+    if len(frontier) <= 1:
+        batch = {node: _resolve(node, artifacts) for node in frontier}
+        for node, (payload, unresolved) in batch.items():
+            if not allow_partial_functions and unresolved:
+                raise UnresolvedDependencyError("Cannot resolve {}".format(unresolved))
+            result[node] = payload
+        return result
+
     done = set()
     result = {}
-    graph = utils.to_graph(artifacts)
-    frontier = set(utils.branes(graph))
-    pool = mp.Pool(processes=processes)
-
+    pool = mp.Pool(
+        processes=processes if processes is not None else min(mp.cpu_count(), len(frontier))
+    )
     for node in frontier:
         pool.apply_async(
             _resolve,
@@ -119,25 +126,26 @@ def _handle_completion(artifacts, graph, result, node, done, payload, **kwargs):
     if not kwargs['allow_partial_functions'] and unresolved:
         raise UnresolvedDependencyError("Cannot resolve {}".format(unresolved))
 
-    print('@{}: Back at parent thread, got results for node [{}]!'.format(os.getpid(), node))
-
     done.add(node)
     result[node] = out
-    batch = set([
+    batch = [
         nxt for nxt in graph[node]
         if not set(k for k, v in graph.items() if nxt in v and k not in done)
-    ])
+    ]
 
-    print('@{}: Next batch = {}'.format(os.getpid(), batch))
     if not batch:
         return
 
-    pool = mp.Pool()
-    for node in batch:
+    if len(batch) == 1:
+        result[batch[0]] = _resolve(batch[0], artifacts)
+        return
+
+    pool = mp.Pool(processes=min(mp.cpu_count(), len(batch)))
+    for nxt in batch:
         pool.apply_async(_resolve,
-            args=(node, artifacts),
+            args=(nxt, artifacts),
             callback=partial(_handle_completion,
-                artifacts, graph, result, node, done,
+                artifacts, graph, result, nxt, done,
                 **kwargs
             )
         )

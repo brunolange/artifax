@@ -37,7 +37,7 @@ class BuildTest(unittest.TestCase):
             'dictionary': {'answer': 42},
             'set': set([1,2,3.14])
         }
-        result = build(artifacts)
+        result = build(artifacts, solver='linear') # async solver copies objects to subprocess!!
         for k in artifacts:
             self.assertEqual(result[k], artifacts[k])
 
