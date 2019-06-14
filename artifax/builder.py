@@ -119,19 +119,16 @@ def _handle_completion(artifacts, graph, result, node, done, payload, **kwargs):
     if not kwargs['allow_partial_functions'] and unresolved:
         raise UnresolvedDependencyError("Cannot resolve {}".format(unresolved))
 
-    print('@{}: Processed [{}]! Got [{}]'.format(os.getpid(), node, out))
-
-    result[node] = out
+    print('@{}: Back at parent thread, got results for node [{}]!'.format(os.getpid(), node))
 
     done.add(node)
+    result[node] = out
+    batch = set([
+        nxt for nxt in graph[node]
+        if not set(k for k, v in graph.items() if nxt in v and k not in done)
+    ])
 
-    batch = set()
-    for nxt in graph[node]:
-        pending = set(k for k, v in graph.items() if nxt in v and k not in done)
-        if not pending:
-            batch.add(nxt)
-
-    print('@{}: next batch = {}'.format(os.getpid(), batch))
+    print('@{}: Next batch = {}'.format(os.getpid(), batch))
     if not batch:
         return
 
