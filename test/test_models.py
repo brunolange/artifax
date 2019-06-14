@@ -41,7 +41,7 @@ class ModelTest(unittest.TestCase):
             'dictionary': {'answer': 42},
             'set': set([1,2,3.14])
         })
-        result = afx.build()
+        result = afx.build(solver='linear')
         self.assertEqual(result['int'], 42)
         self.assertEqual(result['float'], 1.618)
         self.assertEqual(result['string'], 'Hello')
@@ -57,11 +57,12 @@ class ModelTest(unittest.TestCase):
         }
         afx = Artifax(artifacts)
         with self.assertRaises(UnresolvedDependencyError):
-            _ = afx.build()
+            _ = afx.build(solver='bfs_parallel')
 
         result = afx.build(allow_partial_functions=True)
         self.assertIsInstance(result['b'], partial)
 
+    # TODO: Fix async
     def test_incremental_build(self):
         class ExpensiveObject:
             def __init__(self):
@@ -76,24 +77,24 @@ class ModelTest(unittest.TestCase):
             'q': (12, 13),
             'exo': lambda q: exo.expensive_method(q),
         })
-        result = afx.build()
+        result = afx.build(solver='linear')
         self.assertEqual(exo.counter, 1)
 
         afx.set('p', (1,1))
-        result = afx.build()
+        result = afx.build(solver='linear')
         self.assertEqual(exo.counter, 1)
 
         afx.set('q', (0,0))
-        result = afx.build()
+        result = afx.build(solver='linear')
         self.assertEqual(exo.counter, 2)
 
         afx.set('new', 'hello')
-        result = afx.build()
+        result = afx.build(solver='linear')
         self.assertEqual(result['new'], 'hello')
         self.assertEqual(exo.counter, 2)
 
         afx.pop('new')
-        result = afx.build()
+        result = afx.build(solver='linear')
         self.assertEqual(exo.counter, 2)
 
     def test_branes(self):
@@ -156,6 +157,7 @@ class ModelTest(unittest.TestCase):
         self.assertEqual(result['name'], 'World')
         self.assertEqual(result['punctuation'], '!')
 
+    # TODO: Fix async
     def test_stale(self):
         class C:
             counter = 0
@@ -167,14 +169,14 @@ class ModelTest(unittest.TestCase):
             'b': lambda a: math.pow(a, 5),
             'counter': lambda: C(),
         })
-        result = afx.build(targets='b')
+        result = afx.build(targets='b', solver='bfs')
         self.assertEqual(result, 130691232)
 
         # 'counter' node should not have been evaluated
         # and should still be stale
         self.assertEqual(C.counter, 0)
 
-        _ = afx.build()['counter']()
+        _ = afx.build(solver='bfs')['counter']()
         self.assertEqual(C.counter, 1)
 
     def test_at_constructor(self):

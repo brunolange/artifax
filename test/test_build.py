@@ -74,7 +74,7 @@ class BuildTest(unittest.TestCase):
             'b': lambda A: A*2
         }
         with self.assertRaises(UnresolvedDependencyError):
-            _ = build(artifacts)
+            _ = build(artifacts, solver='linear')
 
         result = build(artifacts, allow_partial_functions=True)
         self.assertIsInstance(result['b'], partial)

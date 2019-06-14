@@ -77,29 +77,12 @@ def _build_parallel_bfs(artifacts, allow_partial_functions=False, processes=None
 
     return result
 
-def _resolve(node, store):
-    value = store[node]
-    args = utils.arglist(value)
-    if isinstance(value, utils.At):
-        args = value.args()
-        value = value.value()
-    keys = [utils.unescape(a) for a in args]
-    args = [store[key] for key in keys if key in store]
-    unresolved = [key for key in keys if key not in store]
-    return apply(value, *args), unresolved
-
 def _build_async(artifacts, allow_partial_functions=False, processes=None):
     graph = utils.to_graph(artifacts)
     frontier = utils.branes(graph)
 
-    result = {}
-    if len(frontier) <= 1:
-        batch = {node: _resolve(node, artifacts) for node in frontier}
-        for node, (payload, unresolved) in batch.items():
-            if not allow_partial_functions and unresolved:
-                raise UnresolvedDependencyError("Cannot resolve {}".format(unresolved))
-            result[node] = payload
-        return result
+    if not frontier:
+        return {}
 
     done = set()
     result = {}
@@ -137,7 +120,9 @@ def _handle_completion(artifacts, graph, result, node, done, payload, **kwargs):
         return
 
     if len(batch) == 1:
-        result[batch[0]] = _resolve(batch[0], artifacts)
+        result[batch[0]], unresolved = _resolve(batch[0], artifacts)
+        if not kwargs['allow_partial_functions'] and unresolved:
+            raise UnresolvedDependencyError("Cannot resolve {}".format(unresolved))
         return
 
     pool = mp.Pool(processes=min(mp.cpu_count(), len(batch)))
@@ -152,3 +137,14 @@ def _handle_completion(artifacts, graph, result, node, done, payload, **kwargs):
 
     pool.close()
     pool.join()
+
+def _resolve(node, store):
+    value = store[node]
+    args = utils.arglist(value)
+    if isinstance(value, utils.At):
+        args = value.args()
+        value = value.value()
+    keys = [utils.unescape(a) for a in args]
+    args = [store[key] for key in keys if key in store]
+    unresolved = [key for key in keys if key not in store]
+    return apply(value, *args), unresolved
