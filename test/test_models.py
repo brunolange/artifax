@@ -157,7 +157,6 @@ class ModelTest(unittest.TestCase):
         self.assertEqual(result['name'], 'World')
         self.assertEqual(result['punctuation'], '!')
 
-    # TODO: Fix async
     def test_stale(self):
         class C:
             counter = 0
@@ -169,14 +168,16 @@ class ModelTest(unittest.TestCase):
             'b': lambda a: math.pow(a, 5),
             'counter': lambda: C(),
         })
-        result = afx.build(targets='b', solver='bfs')
+        result = afx.build(targets='b')
         self.assertEqual(result, 130691232)
 
         # 'counter' node should not have been evaluated
         # and should still be stale
         self.assertEqual(C.counter, 0)
 
-        _ = afx.build(solver='bfs')['counter']()
+        # cannot use async solver here because C won't be
+        # pickable from pyunit
+        _ = afx.build()['counter']()
         self.assertEqual(C.counter, 1)
 
     def test_at_constructor(self):
