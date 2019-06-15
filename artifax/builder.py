@@ -1,6 +1,6 @@
 from functools import reduce, partial
 from . import utils
-from .exceptions import UnresolvedDependencyError
+from .exceptions import UnresolvedDependencyError, InvalidSolverError
 from collections import deque
 import operator
 import pathos.multiprocessing as mp
@@ -20,6 +20,8 @@ def build(artifacts, allow_partial_functions=False, solver='linear', **kwargs):
         'bfs_parallel': _build_parallel_bfs,
         'async':        _build_async
     }
+    if not solver in solvers:
+        raise InvalidSolverError('unrecognized solver [{}]'.format(solver))
 
     return solvers[solver](
         artifacts,
