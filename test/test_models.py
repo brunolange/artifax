@@ -62,7 +62,6 @@ class ModelTest(unittest.TestCase):
         result = afx.build(allow_partial_functions=True)
         self.assertIsInstance(result['b'], partial)
 
-    # TODO: Fix async
     def test_incremental_build(self):
         class ExpensiveObject:
             def __init__(self):
@@ -77,6 +76,10 @@ class ModelTest(unittest.TestCase):
             'q': (12, 13),
             'exo': lambda q: exo.expensive_method(q),
         })
+
+        # pool_async silently fails to get trigger callback that resolves
+        # the nodes, I guess because it can't pickle ExpensiveObject
+        # from the unittest thread
         result = afx.build(solver='linear')
         self.assertEqual(exo.counter, 1)
 
