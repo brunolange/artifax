@@ -37,7 +37,7 @@ class BuildTest(unittest.TestCase):
             'dictionary': {'answer': 42},
             'set': set([1,2,3.14])
         }
-        result = build(artifacts)
+        result = build(artifacts, solver='linear') # async solver copies objects to subprocess!!
         for k in artifacts:
             self.assertEqual(result[k], artifacts[k])
 
@@ -74,7 +74,7 @@ class BuildTest(unittest.TestCase):
             'b': lambda A: A*2
         }
         with self.assertRaises(UnresolvedDependencyError):
-            _ = build(artifacts)
+            _ = build(artifacts, solver='linear')
 
         result = build(artifacts, allow_partial_functions=True)
         self.assertIsInstance(result['b'], partial)
@@ -119,7 +119,7 @@ class BuildTest(unittest.TestCase):
         def subtract(p, q):
             return p - q
 
-        solvers = ['linear', 'bfs', 'bfs_parallel']
+        solvers = ['linear', 'bfs', 'bfs_parallel', 'async']
         results = [build({
             'a': -11,
             'b': 7.5,

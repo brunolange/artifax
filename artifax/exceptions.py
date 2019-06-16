@@ -8,3 +8,6 @@ class UnresolvedDependencyError(Exception):
     in the artifax graph. If you do want any of your nodes to resolve to a partial
     function, you need to set the allow_partial_functions flag in the build
     method/function to True."""
+
+class InvalidSolverError(Exception):
+    """ Thrown when requested solver is not available. """

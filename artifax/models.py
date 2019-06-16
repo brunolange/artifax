@@ -128,7 +128,7 @@ class Artifax:
         _moonwalk(node, self._graph, dependencies)
         return dependencies
 
-    def build(self, targets=None, allow_partial_functions=None, **kwargs):
+    def build(self, targets=None, allow_partial_functions=None, solver='linear', **kwargs):
         targets = (targets,) if isinstance(targets, str) else targets
         if targets:
             for target in targets:
@@ -138,6 +138,7 @@ class Artifax:
         shipment = self._shipment(targets)
         result = builder.build(
             shipment,
+            solver=solver,
             allow_partial_functions=(
                 allow_partial_functions if allow_partial_functions is not None else
                 self._allow_partial_functions

@@ -41,7 +41,7 @@ class ModelTest(unittest.TestCase):
             'dictionary': {'answer': 42},
             'set': set([1,2,3.14])
         })
-        result = afx.build()
+        result = afx.build(solver='linear')
         self.assertEqual(result['int'], 42)
         self.assertEqual(result['float'], 1.618)
         self.assertEqual(result['string'], 'Hello')
@@ -57,7 +57,7 @@ class ModelTest(unittest.TestCase):
         }
         afx = Artifax(artifacts)
         with self.assertRaises(UnresolvedDependencyError):
-            _ = afx.build()
+            _ = afx.build(solver='bfs_parallel')
 
         result = afx.build(allow_partial_functions=True)
         self.assertIsInstance(result['b'], partial)
@@ -76,24 +76,28 @@ class ModelTest(unittest.TestCase):
             'q': (12, 13),
             'exo': lambda q: exo.expensive_method(q),
         })
-        result = afx.build()
+
+        # pool_async silently fails to get trigger callback that resolves
+        # the nodes, I guess because it can't pickle ExpensiveObject
+        # from the unittest thread
+        result = afx.build(solver='linear')
         self.assertEqual(exo.counter, 1)
 
         afx.set('p', (1,1))
-        result = afx.build()
+        result = afx.build(solver='linear')
         self.assertEqual(exo.counter, 1)
 
         afx.set('q', (0,0))
-        result = afx.build()
+        result = afx.build(solver='linear')
         self.assertEqual(exo.counter, 2)
 
         afx.set('new', 'hello')
-        result = afx.build()
+        result = afx.build(solver='linear')
         self.assertEqual(result['new'], 'hello')
         self.assertEqual(exo.counter, 2)
 
         afx.pop('new')
-        result = afx.build()
+        result = afx.build(solver='linear')
         self.assertEqual(exo.counter, 2)
 
     def test_branes(self):
@@ -174,6 +178,8 @@ class ModelTest(unittest.TestCase):
         # and should still be stale
         self.assertEqual(C.counter, 0)
 
+        # cannot use async solver here because C won't be
+        # pickable from pyunit
         _ = afx.build()['counter']()
         self.assertEqual(C.counter, 1)
 
