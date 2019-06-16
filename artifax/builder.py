@@ -7,6 +7,7 @@ import pathos.multiprocessing as mp
 import time
 import os
 
+""" function application """
 apply = lambda v, *args: (
     v(*args)            if callable(v) and args and len(utils.arglist(v)) == len(args) else
     partial(v, *args)   if callable(v) else

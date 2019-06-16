@@ -29,10 +29,6 @@ class Artifax:
         def __init__(self, *args, **kwargs):
             self._data = {}
             self.update(*args, **kwargs)
-            self._sorting = []
-
-        def sorting(self, *args):
-            return fluent(self, '_sorting', *args)
 
         def __setitem__(self, key, item):
             self._data[key] = item
