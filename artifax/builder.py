@@ -24,7 +24,7 @@ def build(artifacts, allow_partial_functions=False, solver='linear', **kwargs):
         raise InvalidSolverError('unrecognized solver [{}]'.format(solver))
 
     return solvers[solver](
-        artifacts,
+        artifacts.copy(),
         allow_partial_functions=allow_partial_functions,
         **kwargs
     )
@@ -37,7 +37,7 @@ def _build_linear(artifacts, allow_partial_functions=False):
         store[node] = _resolve(node, store, allow_partial_functions)
         return store
 
-    return reduce(_reducer, nodes, artifacts.copy())
+    return reduce(_reducer, nodes, artifacts)
 
 def _build_bfs(artifacts, allow_partial_functions=False):
     done = set()
