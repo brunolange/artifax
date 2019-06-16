@@ -1,16 +1,27 @@
+""" models.py
+
+This module hosts classes that provided the object-oriented support to building
+artifacts.
+"""
+
 from functools import reduce
 import operator
 from . import builder
 from . import utils
 from . import langda as ft
 
-def fluent(cls, attr, *args):
+def _fluent(cls, attr, *args):
+    """ provides a fluent interface for any classes that choose to apply it. """
     if args:
         setattr(cls, attr, args[0])
         return cls
     return getattr(cls, attr)
 
 class Artifax:
+    """ The Artifax class enables artifacts to be built through a conventional
+    object-oriented interface. Its stateful nature boasts additional capabilities
+    like incremental builds and building of stale nodes only.
+    """
     class Result:
         """ The Result class acts as an augmented dictionary to
         hold the artifax build products and any additional information
@@ -39,27 +50,41 @@ class Artifax:
             del self._data[key]
 
         def clear(self):
+            """ Removes all items from result. """
             return self._data.clear()
 
         def copy(self):
+            """ Returns a shallow copy of the result dictionary. """
             return self._data.copy()
 
         def has_key(self, k):
+            """ Returns True if key k is part of the result and False otherwise.
+            """
             return k in self._data
 
         def update(self, *args, **kwargs):
+            """ R.update([E, ]**F) -> None.  Update R from dict/iterable E and F.
+            If E is present and has a .keys() method, then does:  for k in E: R[k] = E[k]
+            If E is present and lacks a .keys() method, then does:  for k, v in E: R[k] = v
+            In either case, this is followed by: for k in F:  R[k] = F[k] """
             return self._data.update(*args, **kwargs)
 
         def keys(self):
+            """ Returns a set-like object providing a view on D's keys. """
             return self._data.keys()
 
         def values(self):
+            """ Returns an object providing a view on D's values. """
             return self._data.values()
 
         def items(self):
+            """ Returns key, value pairs of data dictionary items. """
             return self._data.items()
 
         def pop(self, *args):
+            """ pop(k, [,d]) -> v, remove specified key and return
+            the corresponding value. If key is not found, d is returned
+            if given, otherwise KeyError is raised """
             return self._data.pop(*args)
 
         def __cmp__(self, dict_):
@@ -85,6 +110,7 @@ class Artifax:
         self._graph = utils.to_graph(self._artifacts)
 
     def set(self, node, value):
+        """ Sets node value. """
         if node in self._artifacts:
             self._revoke(node)
         self._stale.add(node)
@@ -96,6 +122,7 @@ class Artifax:
         ft.each(self._graph[node], self._revoke)
 
     def pop(self, node):
+        """ Removes node from the artifacts. """
         if node in self._stale:
             self._stale.remove(node)
         item = self._artifacts.pop(node)
@@ -129,6 +156,20 @@ class Artifax:
         return dependencies
 
     def build(self, targets=None, allow_partial_functions=None, solver='linear', **kwargs):
+        """ Builds artifacts. Returns either a dictionary of resolved nodes or a tuple
+        where each item corresponds to one of the defined targets.
+
+        Args:
+            targets (:obj:`string or tuple`, optional): Defines specific targets
+                to be built. Either a tuple of node names or a string for single
+                targets.
+            allow_partial_functions (bool, optional): Set to True if artifacts are
+                allowed to be resolved to partial functions. Defaults to False.
+            solver (str, optional): Choose artifax solver strategy. Pick between
+                {'linear', 'bfs', 'bfs_parallel', 'async'}. Defaults to 'linear'.
+                Throws InvalidSolverError if solver is not among the available options.
+            **kwargs: Arbitrary keyword arguments that are solver-specific.
+        """
         targets = (targets,) if isinstance(targets, str) else targets
         if targets:
             for target in targets:
@@ -163,9 +204,11 @@ class Artifax:
         return utils.initial(self._graph)
 
     def number_of_edges(self):
+        """ Returns the number of edges in the artifacts graph."""
         return sum([len(v) for v in self._graph.values()])
 
     def number_of_nodes(self):
+        """ Returns the number of nodes in the artifacts graph."""
         return len(self._artifacts)
 
     def __len__(self):
