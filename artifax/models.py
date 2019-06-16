@@ -130,12 +130,11 @@ class Artifax:
         return item
 
     def _shipment(self, targets=None):
-        graph = utils.to_graph(self._artifacts)
         nodes = (
             self._stale if targets is None else
             set(reduce(
                 operator.iconcat,
-                [self._dependencies(graph, t) for t in targets] + [list(targets)],
+                [self._dependencies(t) for t in targets] + [list(targets)],
                 []
             ))
         )
@@ -144,7 +143,7 @@ class Artifax:
             for k in nodes
         }
 
-    def _dependencies(self, graph, node):
+    def _dependencies(self, node):
         def _moonwalk(node, graph, dependencies):
             for vertex, neighbors in graph.items():
                 if node in neighbors:
