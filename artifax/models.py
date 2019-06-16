@@ -157,8 +157,10 @@ class Artifax:
         ])
         return payload if len(payload) > 1 else payload[0]
 
-    def branes(self):
-        return utils.branes(self._graph)
+    def initial(self):
+        """ Returns the initial objects of the artifacts graph, that is,
+        the nodes that have no incoming edges, no dependencies."""
+        return utils.initial(self._graph)
 
     def number_of_edges(self):
         return sum([len(v) for v in self._graph.values()])

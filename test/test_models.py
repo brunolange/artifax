@@ -100,7 +100,7 @@ class ModelTest(unittest.TestCase):
         result = afx.build(solver='linear')
         self.assertEqual(exo.counter, 2)
 
-    def test_branes(self):
+    def test_initial(self):
         afx = Artifax({
             'earth': object(),
             'un': lambda earth: 'dirt @{}'.format(earth),
@@ -109,7 +109,7 @@ class ModelTest(unittest.TestCase):
             'belt': object(),
             'opa': lambda belt: 'ice @{}'.format(belt)
         })
-        self.assertEqual(afx.branes(), set(['earth', 'mars', 'belt']))
+        self.assertEqual(afx.initial(), set(['earth', 'mars', 'belt']))
         _ = afx.build()
 
     def test_multiprocessing(self):

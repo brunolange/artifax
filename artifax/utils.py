@@ -52,7 +52,7 @@ def topological_sort(graph):
         _visit(node, temp, perm, tlist)
     return tlist
 
-def branes(graph):
+def initial(graph):
     def to_mask(mask, node, graph, key):
         neighbors = graph[node]
         for neighbor in neighbors:

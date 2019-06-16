@@ -43,7 +43,7 @@ def _build_bfs(artifacts, allow_partial_functions=False):
     done = set()
     result = {}
     graph = utils.to_graph(artifacts)
-    frontier = deque(utils.branes(graph))
+    frontier = deque(utils.initial(graph))
     while frontier:
         node = frontier.popleft()
         result[node] = _resolve(node, artifacts, allow_partial_functions=allow_partial_functions)
@@ -59,7 +59,7 @@ def _build_parallel_bfs(artifacts, allow_partial_functions=False, processes=None
     done = set()
     result = {}
     graph = utils.to_graph(artifacts)
-    frontier = set(utils.branes(graph))
+    frontier = set(utils.initial(graph))
     pool = mp.Pool(processes=processes)
     while frontier:
         batch = {
@@ -80,7 +80,7 @@ def _build_parallel_bfs(artifacts, allow_partial_functions=False, processes=None
 
 def _build_async(artifacts, allow_partial_functions=False, processes=None):
     graph = utils.to_graph(artifacts)
-    frontier = utils.branes(graph)
+    frontier = utils.initial(graph)
 
     if not frontier:
         return {}
