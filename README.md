@@ -171,13 +171,40 @@ print(greeting) # prints "Hello, World!"
 print('Cool beans{}'.format(punctuation)) # prints "Cool beans!"
 ```
 
-Targeted builds might be an efficient way of retrieving certain nodes
-without the need to evaluate the entire computation graph.
+Targeted builds are an efficient way of retrieving certain nodes without
+evaluating the entire computation graph.
+
+# Solvers
+
+Depending on the use case, different solvers can be employed to increase performance.
+The `build` function and methods accept an optional `solver` parameter which defaults to
+`linear`.
+
+## The `linear` solver
+
+The linear solver topologically sorts the computation graph in order to generate a sequence
+of nodes to be calculated in order such that for any node, all of its dependencies appear
+before in the sequence.
+
+## The `parallel` solver
+
+The `parallel` solver consumes the computation graph starting from the nodes that have
+no dependencies and processes them all in parallel. When this initial set of nodes is resolved,
+their immediate neighbors make up the new frontier which also gets processed in parallel.
+This procedure continues until there are no more nodes to be calculated. At any step, the
+solver spawns one new process for each node at the frontier without exceeding the number of
+available cores minus 1.
+
+## The `async` solver
+
+The `async` solver takes the parallelism of the `parallel` solver one step further. It is triggered
+each time a node evaluation is completed, looking for new nodes that can be started and evaluating
+them in a new process immediately.
 
 # Error handling
 
-If the computation graph represented by the artifacts dictionary is not a DAG,
-a `CircularDependencyError` exception is thrown.
+If the computation graph represented by the artifacts dictionary is not a DAG
+(Direct Acyclic Graph), a `CircularDependencyError` exception is thrown.
 
 ```python
 import artifax
