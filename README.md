@@ -6,9 +6,9 @@ function signatures.
 
 A computation graph can be entirely encoded in a standard python dictionary.
 Each key represents a node or an artifact, that will eventually be computed
-once all of its dependecies have been calculated. The value associated with
-each key can be any constant - a string, a number or an instance of a class,
-or a function. In the latter case, the function arguments may map to other nodes
+once all of its dependencies have been calculated. The value associated with
+each key can be either a constant - a string, a number or an instance of a class,
+or a function. In the latter case, the function arguments map to other nodes
 in the computation graph to establish a direct dependency between the nodes.
 
 For example, the following dictionary:
@@ -63,8 +63,13 @@ message   : Hello World! The answer is 42.
 
 # Artifax class
 
-In addition to the `build` function, artifacts can be built by `Artifax` class
-instances.
+The `build` function represents the core transformation that yields artifacts.
+It is entirely stateless and has no side-effects. Given the same input graph, it will always
+evaluate every single node and generate the same results.
+
+Whilst these features are highly desirable from any core component, the stateful `Artifax`
+class can be employed to interface with the build function and provide some additional features
+and performance enhancements.
 
 ```python
 from artifax import Artifax, At
@@ -89,6 +94,7 @@ c -84
 a 42
 b 84
 ```
+## Lazy builds
 
 Artifax instances optimize sequential builds by only re-evaluating nodes that
 have become stale due to an update. For example, given the graph illustrated in
@@ -135,10 +141,11 @@ Updating p1...
 Calculating magnitude of vector (1, 1)...
 ```
 
-# Targeted builds
+## Targeted builds
 The `build` method accepts an optional argument that specifies which node in
 your computation graph should be built. Instead of returning the usual dictionary,
-targeted builds return the value associated with the target node.
+targeted builds return a tuple containing the value associated with each of the
+target nodes.
 
 ```python
 terminal_node_value = afx.build(targets='terminal_node')
@@ -153,11 +160,11 @@ Any other nodes in the computation graph do not get evaluated.
 from artifax import Artifax
 afx = Artifax({
     'name': 'World',
-    'punctuation': '',
+    'punctuation': '?',
     'greeting': lambda name, punctuation: 'Hello, {}{}'.format(name, punctuation),
 })
 greeting = afx.build(targets='greeting')
-print(greeting) # prints "Hello, World"
+print(greeting) # prints "Hello, World?"
 afx.set('punctuation', '!')
 greeting, punctuation = afx.build(targets=('greeting', 'punctuation'))
 print(greeting) # prints "Hello, World!"
