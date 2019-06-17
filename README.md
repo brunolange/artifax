@@ -216,3 +216,25 @@ except artifax.CircularDependencyError as err:
 ```
 Cannot build artifacts: artifact graph is not a DAG
 ```
+
+If a particular node is represented by a function for which any of its arguments isn't part
+of the computation graph, an `UnresolvedDependencyError` exception is thrown.
+
+```python
+_ = artifax.build({
+    'x': 42,
+    'p': lambda x, y: x + y
+}) # raises UnresolvedDependencyError due to missing 'y' node
+```
+
+However, sometimes this behavior might be desirable if we want nodes to resolve to partially
+applied functions that can be used elsewhere. If that's the case, the exception can be suppressed
+by setting the `allow_partial_functions` optional parameter to `build` to `True`.
+
+```python
+results = artifax.build({
+    'x': 42,
+    'p': lambda x, y: x + y
+}, allow_partial_functions=True)
+print(results['p'](100)) # prints 142
+```
