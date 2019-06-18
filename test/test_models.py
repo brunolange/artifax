@@ -197,3 +197,14 @@ class ModelTest(unittest.TestCase):
         ab, ba = afx.build(targets=('ab', 'ba'))
         self.assertEqual(ab, -18.5)
         self.assertEqual(ba, 18.5)
+
+    def test_logger(self):
+        afx = Artifax({
+            'a': 42,
+            'b': lambda a: a + 10
+        })
+
+        import time
+        def logger(line):
+            print('[{}] {}'.format(time.asctime(), line))
+        _ = afx.build(solver='linear', logger=logger)

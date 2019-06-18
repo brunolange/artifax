@@ -17,6 +17,9 @@ _apply = lambda v, *args: (
     v
 )
 
+# pylint: disable=C0103
+_void = lambda v: None
+
 def build(artifacts, allow_partial_functions=False, solver='linear', **kwargs):
     """ Core artifact building function. Given an input dictionary describing the
     computation graph where each vertex correspond to a key and edges can be extracted
@@ -45,9 +48,10 @@ def build(artifacts, allow_partial_functions=False, solver='linear', **kwargs):
         **kwargs
     )
 
-def _build_linear(artifacts, allow_partial_functions=False):
+def _build_linear(artifacts, allow_partial_functions=False, logger=_void):
     graph = utils.to_graph(artifacts)
     nodes = utils.topological_sort(graph)
+    logger('Topological sorting of nodes: {}'.format(nodes))
 
     def _reducer(store, node):
         store[node] = _resolve(node, store, allow_partial_functions)
