@@ -7,8 +7,7 @@ import pathos.multiprocessing as mp
 import time
 import os
 
-""" function application """
-apply = lambda v, *args: (
+_apply = lambda v, *args: (
     v(*args)            if callable(v) and args and len(utils.arglist(v)) == len(args) else
     partial(v, *args)   if callable(v) else
     v
@@ -150,4 +149,4 @@ def _resolve(node, store, allow_partial_functions=False):
     unresolved = [key for key in keys if key not in store]
     if not allow_partial_functions and unresolved:
         raise UnresolvedDependencyError("Cannot resolve {}".format(unresolved))
-    return apply(value, *args)
+    return _apply(value, *args)
