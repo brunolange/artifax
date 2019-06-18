@@ -1,12 +1,16 @@
+""" builder.py
+
+This module hosts the core build function and the private functions that aid it.
+"""
+
 from functools import reduce, partial
-from . import utils
-from .exceptions import UnresolvedDependencyError, InvalidSolverError
 from collections import deque
 import operator
 import pathos.multiprocessing as mp
-import time
-import os
+from . import utils
+from .exceptions import UnresolvedDependencyError, InvalidSolverError
 
+# pylint: disable=C0103
 _apply = lambda v, *args: (
     v(*args)            if callable(v) and args and len(utils.arglist(v)) == len(args) else
     partial(v, *args)   if callable(v) else
@@ -14,13 +18,25 @@ _apply = lambda v, *args: (
 )
 
 def build(artifacts, allow_partial_functions=False, solver='linear', **kwargs):
+    """ Core artifact building function. Given an input dictionary describing the
+    computation graph where each vertex correspond to a key and edges can be extracted
+    from the function signatures associated with each key, the build function returns
+    a new dictionary where each key is mapped to its final value.
+
+    Args:
+        allow_partial_functions (bool, optional): Set to True if artifacts are
+            allowed to be resolved to partial functions. Defaults to False.
+        solver (str, optional): Choose artifax solver strategy. Pick between
+            {'linear', 'bfs', 'bfs_parallel', 'async'}. Defaults to 'linear'.
+        **kwargs: solver-specific keyword arguments.
+    """
     solvers = {
         'linear':       _build_linear,
         'bfs':          _build_bfs,
         'bfs_parallel': _build_parallel_bfs,
         'async':        _build_async
     }
-    if not solver in solvers:
+    if solver not in solvers:
         raise InvalidSolverError('unrecognized solver [{}]'.format(solver))
 
     return solvers[solver](
@@ -94,8 +110,13 @@ def _build_async(artifacts, allow_partial_functions=False, processes=None):
         pool.apply_async(
             partial(_resolve, allow_partial_functions=allow_partial_functions),
             args=(node, artifacts),
-            callback=partial(_handle_completion,
-                artifacts, graph, result, node, done,
+            callback=partial(
+                _on_done,
+                artifacts,
+                graph,
+                result,
+                node,
+                done,
                 allow_partial_functions=allow_partial_functions,
             )
         )
@@ -105,7 +126,7 @@ def _build_async(artifacts, allow_partial_functions=False, processes=None):
 
     return result
 
-def _handle_completion(artifacts, graph, result, node, done, value, allow_partial_functions=False, **kwargs):
+def _on_done(artifacts, graph, result, node, done, value, allow_partial_functions=False, **kwargs):
     done.add(node)
     result[node] = value
     batch = [
@@ -126,14 +147,16 @@ def _handle_completion(artifacts, graph, result, node, done, value, allow_partia
 
     pool = mp.Pool(processes=min(mp.cpu_count(), len(batch)))
     for nxt in batch:
-        pool.apply_async(_resolve,
-            args=(nxt, artifacts),
-            callback=partial(_handle_completion,
-                artifacts, graph, result, nxt, done,
-                allow_partial_functions=allow_partial_functions,
-                **kwargs
-            )
-        )
+        pool.apply_async(_resolve, args=(nxt, artifacts), callback=partial(
+            _on_done,
+            artifacts,
+            graph,
+            result,
+            nxt,
+            done,
+            allow_partial_functions=allow_partial_functions,
+            **kwargs
+        ))
 
     pool.close()
     pool.join()
