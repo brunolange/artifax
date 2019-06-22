@@ -104,7 +104,7 @@ def _build_async(artifacts, apf=False, processes=None):
 
     done, rem = set(), set()
     pool = mp.Pool(
-        processes=processes if processes is not None else min(mp.cpu_count(), len(frontier))
+        processes=processes if processes is not None else min(mp.cpu_count() - 1, len(frontier))
     )
     for node in frontier:
         pool.apply_async(partial(_resolve, apf=apf), args=(node, artifacts), callback=partial(
@@ -138,7 +138,7 @@ def _on_done(artifacts, graph, node, done, rem, value, apf=False, **kwargs):
     if not batch:
         return
 
-    pool = mp.Pool(processes=min(mp.cpu_count(), len(batch)))
+    pool = mp.Pool(processes=min(mp.cpu_count() - 1, len(batch)))
     for nxt in batch:
         pool.apply_async(_resolve, args=(nxt, artifacts), callback=partial(
             _on_done,
