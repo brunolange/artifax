@@ -41,36 +41,38 @@ def build(artifacts, allow_partial_functions=False, solver='linear', **kwargs):
 
     return solvers[solver](
         artifacts.copy(),
-        allow_partial_functions=allow_partial_functions,
+        apf=allow_partial_functions,
         **kwargs
     )
 
-def _build_linear(artifacts, allow_partial_functions=False):
+def _build_linear(artifacts, apf=False):
     graph = utils.to_graph(artifacts)
     nodes = utils.topological_sort(graph)
 
     def _reducer(store, node):
-        store[node] = _resolve(node, store, allow_partial_functions)
+        store[node] = _resolve(node, store, apf=apf)
         return store
 
     return reduce(_reducer, nodes, artifacts)
 
-def _build_bfs(artifacts, allow_partial_functions=False):
+def _pendencies(graph, node, done):
+    return {
+        k for k, v in graph.items() if node in v and k not in done
+    }
+
+def _build_bfs(artifacts, apf=False):
     done = set()
     graph = utils.to_graph(artifacts)
     frontier = deque(utils.initial(graph))
     while frontier:
         node = frontier.popleft()
-        artifacts[node] = _resolve(node, artifacts, allow_partial_functions=allow_partial_functions)
+        artifacts[node] = _resolve(node, artifacts, apf=apf)
         done.add(node)
-        for nxt in graph[node]:
-            pending = set(k for k, v in graph.items() if nxt in v and k not in done)
-            if not pending:
-                frontier.append(nxt)
+        frontier += [nxt for nxt in graph[node] if not _pendencies(graph, nxt, done)]
 
     return artifacts
 
-def _build_parallel_bfs(artifacts, allow_partial_functions=False, processes=None):
+def _build_parallel_bfs(artifacts, apf=False, processes=None):
     done = set()
     graph = utils.to_graph(artifacts)
     frontier = set(utils.initial(graph))
@@ -80,23 +82,20 @@ def _build_parallel_bfs(artifacts, allow_partial_functions=False, processes=None
             node: pool.apply(_resolve, args=(node, artifacts))
             for node in frontier
         } if len(frontier) > 1 else {
-            node: _resolve(node, artifacts, allow_partial_functions=allow_partial_functions)
+            node: _resolve(node, artifacts, apf=apf)
             for node in frontier
         })
         done |= frontier
-        new_frontier = set()
-        for node in frontier:
-            for nxt in graph[node]:
-                pending = set(k for k, v in graph.items() if nxt in v and k not in done)
-                if not pending:
-                    new_frontier.add(nxt)
-        frontier = new_frontier
+        frontier = reduce(lambda acc, curr: acc | curr, [
+            {nxt for nxt in graph[node] if not _pendencies(graph, nxt, done)}
+            for node in frontier
+        ], set())
 
     pool.close()
 
     return artifacts
 
-def _build_async(artifacts, allow_partial_functions=False, processes=None):
+def _build_async(artifacts, apf=False, processes=None):
     graph = utils.to_graph(artifacts)
     frontier = utils.initial(graph)
 
@@ -104,47 +103,37 @@ def _build_async(artifacts, allow_partial_functions=False, processes=None):
         return {}
 
     done = set()
-    result = {}
     pool = mp.Pool(
         processes=processes if processes is not None else min(mp.cpu_count(), len(frontier))
     )
     for node in frontier:
-        pool.apply_async(
-            partial(_resolve, allow_partial_functions=allow_partial_functions),
-            args=(node, artifacts),
-            callback=partial(
-                _on_done,
-                artifacts,
-                graph,
-                result,
-                node,
-                done,
-                allow_partial_functions=allow_partial_functions,
-            )
-        )
+        pool.apply_async(partial(_resolve, apf=apf), args=(node, artifacts), callback=partial(
+            _on_done,
+            artifacts,
+            graph,
+            node,
+            done,
+            apf=apf,
+        ))
 
     pool.close()
     pool.join()
 
-    return result
+    return artifacts
 
-def _on_done(artifacts, graph, result, node, done, value, allow_partial_functions=False, **kwargs):
+def _on_done(artifacts, graph, node, done, value, apf=False, **kwargs):
     done.add(node)
-    result[node] = value
+    artifacts[node] = value
     batch = [
         nxt for nxt in graph[node]
-        if not set(k for k, v in graph.items() if nxt in v and k not in done)
+        if not _pendencies(graph, nxt, done)
     ]
 
     if not batch:
         return
 
     if len(batch) == 1:
-        result[batch[0]] = _resolve(
-            batch[0],
-            artifacts,
-            allow_partial_functions=allow_partial_functions
-        )
+        artifacts[batch[0]] = _resolve(batch[0], artifacts, apf=apf)
         return
 
     pool = mp.Pool(processes=min(mp.cpu_count(), len(batch)))
@@ -153,17 +142,16 @@ def _on_done(artifacts, graph, result, node, done, value, allow_partial_function
             _on_done,
             artifacts,
             graph,
-            result,
             nxt,
             done,
-            allow_partial_functions=allow_partial_functions,
+            apf=apf,
             **kwargs
         ))
 
     pool.close()
     pool.join()
 
-def _resolve(node, store, allow_partial_functions=False):
+def _resolve(node, store, apf=False):
     value = store[node]
     args = utils.arglist(value)
     if isinstance(value, utils.At):
@@ -172,6 +160,6 @@ def _resolve(node, store, allow_partial_functions=False):
     keys = [utils.unescape(a) for a in args]
     args = [store[key] for key in keys if key in store]
     unresolved = [key for key in keys if key not in store]
-    if not allow_partial_functions and unresolved:
+    if not apf and unresolved:
         raise UnresolvedDependencyError("Cannot resolve {}".format(unresolved))
     return _apply(value, *args)
