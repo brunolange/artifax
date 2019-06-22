@@ -57,42 +57,38 @@ def _build_linear(artifacts, allow_partial_functions=False):
 
 def _build_bfs(artifacts, allow_partial_functions=False):
     done = set()
-    result = {}
     graph = utils.to_graph(artifacts)
     frontier = deque(utils.initial(graph))
     while frontier:
         node = frontier.popleft()
-        result[node] = _resolve(node, artifacts, allow_partial_functions=allow_partial_functions)
+        artifacts[node] = _resolve(node, artifacts, allow_partial_functions=allow_partial_functions)
         done.add(node)
         for nxt in graph[node]:
             pending = set(k for k, v in graph.items() if nxt in v and k not in done)
             if not pending:
                 frontier.append(nxt)
 
-    return result
+    return artifacts
 
 def _build_parallel_bfs(artifacts, allow_partial_functions=False, processes=None):
     done = set()
-    result = {}
     graph = utils.to_graph(artifacts)
     frontier = set(utils.initial(graph))
     pool = mp.Pool(processes=processes)
     while frontier:
-        batch = {
+        artifacts.update({
             node: pool.apply(_resolve, args=(node, artifacts))
             for node in frontier
         } if len(frontier) > 1 else {
             node: _resolve(node, artifacts, allow_partial_functions=allow_partial_functions)
             for node in frontier
-        }
-        for node, payload in batch.items():
-            result[node] = payload
+        })
         done |= frontier
         frontier = set(reduce(operator.iconcat, [graph[n] for n in frontier], [])) - done
 
     pool.close()
 
-    return result
+    return artifacts
 
 def _build_async(artifacts, allow_partial_functions=False, processes=None):
     graph = utils.to_graph(artifacts)
