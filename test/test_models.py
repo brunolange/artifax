@@ -103,7 +103,7 @@ class ModelTest(unittest.TestCase):
     def test_initial(self):
         afx = Artifax({
             'earth': object(),
-            'un': lambda earth: 'dirt @{}'.format(earth),
+            'un': lambda earth: 'water @{}'.format(earth),
             'mars': object(),
             'mcrn': lambda mars: 'dust @{}'.format(mars),
             'belt': object(),
