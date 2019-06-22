@@ -133,14 +133,9 @@ def _on_done(artifacts, graph, node, done, rem, value, apf=False, **kwargs):
 
     frontier = rem | set(graph[node])
     batch = {n for n in frontier if not _pendencies(graph, n, done)}
-    rem |= frontier - batch
+    rem = frontier - batch
 
     if not batch:
-        return
-
-    if len(batch) == 1:
-        (node,) = batch
-        artifacts[node] = _resolve(node, artifacts, apf=apf)
         return
 
     pool = mp.Pool(processes=min(mp.cpu_count(), len(batch)))
