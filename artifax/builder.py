@@ -102,7 +102,7 @@ def _build_async(artifacts, apf=False, processes=None):
     if not frontier:
         return {}
 
-    done = set()
+    done, rem = set(), set()
     pool = mp.Pool(
         processes=processes if processes is not None else min(mp.cpu_count(), len(frontier))
     )
@@ -113,27 +113,34 @@ def _build_async(artifacts, apf=False, processes=None):
             graph,
             node,
             done,
+            rem,
             apf=apf,
         ))
 
     pool.close()
     pool.join()
 
+    artifacts.update({
+        n: _resolve(n, artifacts, apf=apf)
+        for n in rem
+    })
+
     return artifacts
 
-def _on_done(artifacts, graph, node, done, value, apf=False, **kwargs):
+def _on_done(artifacts, graph, node, done, rem, value, apf=False, **kwargs):
     done.add(node)
     artifacts[node] = value
-    batch = [
-        nxt for nxt in graph[node]
-        if not _pendencies(graph, nxt, done)
-    ]
+
+    frontier = rem | set(graph[node])
+    batch = {n for n in frontier if not _pendencies(graph, n, done)}
+    rem |= frontier - batch
 
     if not batch:
         return
 
     if len(batch) == 1:
-        artifacts[batch[0]] = _resolve(batch[0], artifacts, apf=apf)
+        (node,) = batch
+        artifacts[node] = _resolve(node, artifacts, apf=apf)
         return
 
     pool = mp.Pool(processes=min(mp.cpu_count(), len(batch)))
@@ -144,6 +151,7 @@ def _on_done(artifacts, graph, node, done, value, apf=False, **kwargs):
             graph,
             nxt,
             done,
+            rem,
             apf=apf,
             **kwargs
         ))

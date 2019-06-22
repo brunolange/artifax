@@ -115,6 +115,17 @@ class BuildTest(unittest.TestCase):
         self.assertEqual(result['a - b'], -18.5)
         self.assertEqual(result['b - a'], 18.5)
 
+    def test_deep_build(self):
+        for solver in ['linear', 'bfs', 'bfs_parallel', 'async']:
+            results = build({
+                'a': 'a',
+                'b': 'b',
+                'x': lambda a: 'x',
+                'c': lambda x, b: 'c',
+            }, solver=solver)
+
+            self.assertEqual(results['c'], 'c')
+
     def test_solvers(self):
         def subtract(p, q):
             return p - q
