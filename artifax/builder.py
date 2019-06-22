@@ -84,7 +84,13 @@ def _build_parallel_bfs(artifacts, allow_partial_functions=False, processes=None
             for node in frontier
         })
         done |= frontier
-        frontier = set(reduce(operator.iconcat, [graph[n] for n in frontier], [])) - done
+        new_frontier = set()
+        for node in frontier:
+            for nxt in graph[node]:
+                pending = set(k for k, v in graph.items() if nxt in v and k not in done)
+                if not pending:
+                    new_frontier.add(nxt)
+        frontier = new_frontier
 
     pool.close()
 
