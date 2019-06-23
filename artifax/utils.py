@@ -1,5 +1,6 @@
 from inspect import getfullargspec
 from functools import reduce
+import os
 from . import exceptions
 
 _REPLACES = {
@@ -64,6 +65,11 @@ def initial(graph):
     mask = reduce(lambda m, n: to_mask(m, n, graph, key), nodes, [0]*len(nodes))
 
     return set([nodes[i] for i in range(len(mask)) if mask[i] == 0])
+
+def pprint(*args, **kwargs):
+    """ Prepends message with process id information """
+    print('[{}]'.format(os.getpid()), end=' ')
+    print(*args, **kwargs)
 
 class At:
     """ The At class is but a wrapper for a tuple-like constructor
