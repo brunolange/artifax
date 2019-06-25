@@ -19,13 +19,18 @@ class BuildTest(unittest.TestCase):
         self.assertEqual(result, {'a': 42})
 
     def test_artifact_immutability(self):
-        artifacts = {'a': lambda: 42}
-        _ = build(artifacts)
+        artifacts = {
+            'a': lambda: 42,
+            'b': lambda a: a()**2
+        }
+
+        results = build(artifacts, solver='async')
 
         self.assertTrue(isinstance(artifacts, dict))
-        self.assertEqual(len(artifacts), 1)
-        self.assertEqual(list(artifacts.keys()), ['a'])
-        self.assertTrue(callable(artifacts['a']))
+        self.assertEqual(len(artifacts), 2)
+        self.assertEqual(set(artifacts.keys()), {'a', 'b'})
+        self.assertTrue(callable(artifacts['b']))
+        self.assertFalse(callable(results['b']))
 
     def test_constant_artifacts_build(self):
         obj = object()
