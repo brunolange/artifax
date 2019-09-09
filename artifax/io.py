@@ -1,9 +1,9 @@
 from functools import reduce
+from jinja2 import Template
 import os
 from . import utils
 
 def tex(artifacts):
-    from jinja2 import Template
     graph = utils.to_graph(artifacts)
     nodes = utils.topological_sort(graph)
 
