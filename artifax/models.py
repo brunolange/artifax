@@ -6,9 +6,9 @@ artifacts.
 
 from functools import reduce
 import operator
+from exos import each
 from . import builder
 from . import utils
-from . import langda as ft
 
 def _fluent(cls, attr, *args):
     """ provides a fluent interface for any classes that choose to apply it. """
@@ -115,7 +115,7 @@ class Artifax:
 
     def _revoke(self, node):
         self._stale.add(node)
-        ft.each(self._graph[node], self._revoke)
+        each(self._revoke, self._graph[node])
 
     def pop(self, node):
         """ Removes node from the artifacts. """
