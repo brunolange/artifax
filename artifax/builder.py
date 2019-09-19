@@ -7,12 +7,13 @@ from functools import reduce, partial
 from collections import deque
 import operator
 import pathos.multiprocessing as mp
-from . import utils
+from exos import compose, each
+from . import utils as u
 from .exceptions import UnresolvedDependencyError, InvalidSolverError
 
 # pylint: disable=C0103
 _apply = lambda v, *args: (
-    v(*args)            if callable(v) and args and len(utils.arglist(v)) == len(args) else
+    v(*args)            if callable(v) and args and len(u.arglist(v)) == len(args) else
     partial(v, *args)   if callable(v) else
     v
 )
@@ -46,13 +47,12 @@ def build(artifacts, allow_partial_functions=False, solver='linear', **kwargs):
     )
 
 def _build_linear(artifacts, apf=False):
-    graph = utils.to_graph(artifacts)
-    nodes = utils.topological_sort(graph)
 
     def _reducer(store, node):
         store[node] = _resolve(node, store, apf=apf)
         return store
 
+    nodes = compose(u.topological_sort, u.to_graph)(artifacts)
     return reduce(_reducer, nodes, artifacts)
 
 def _pendencies(graph, node, done):
@@ -62,8 +62,8 @@ def _pendencies(graph, node, done):
 
 def _build_bfs(artifacts, apf=False):
     done = set()
-    graph = utils.to_graph(artifacts)
-    frontier = deque(utils.initial(graph))
+    graph = u.to_graph(artifacts)
+    frontier = deque(u.initial(graph))
     while frontier:
         node = frontier.popleft()
         artifacts[node] = _resolve(node, artifacts, apf=apf)
@@ -74,8 +74,8 @@ def _build_bfs(artifacts, apf=False):
 
 def _build_parallel_bfs(artifacts, apf=False, processes=None):
     done = set()
-    graph = utils.to_graph(artifacts)
-    frontier = set(utils.initial(graph))
+    graph = u.to_graph(artifacts)
+    frontier = set(u.initial(graph))
     pool = mp.Pool(processes=processes)
     while frontier:
         artifacts.update({
@@ -96,8 +96,8 @@ def _build_parallel_bfs(artifacts, apf=False, processes=None):
     return artifacts
 
 def _build_async(artifacts, apf=False, processes=None):
-    graph = utils.to_graph(artifacts)
-    frontier = utils.initial(graph)
+    graph = u.to_graph(artifacts)
+    frontier = u.initial(graph)
 
     if not frontier:
         return {}
@@ -156,11 +156,11 @@ def _on_done(artifacts, graph, node, done, rem, value, apf=False, **kwargs):
 
 def _resolve(node, store, apf=False):
     value = store[node]
-    args = utils.arglist(value)
-    if isinstance(value, utils.At):
+    args = u.arglist(value)
+    if isinstance(value, u.At):
         args = value.args()
         value = value.value()
-    keys = [utils.unescape(a) for a in args]
+    keys = [u.unescape(a) for a in args]
     args = [store[key] for key in keys if key in store]
     unresolved = [key for key in keys if key not in store]
     if not apf and unresolved:
