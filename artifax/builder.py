@@ -106,16 +106,12 @@ def _build_async(artifacts, apf=False, processes=None):
     if processes is None:
         processes = min(max(1, mp.cpu_count() - 1), len(frontier))
     pool = mp.Pool(processes=processes)
-    for node in frontier:
-        pool.apply_async(partial(_resolve, apf=apf), args=(node, artifacts), callback=partial(
-            _on_done,
-            artifacts,
-            graph,
-            node,
-            done,
-            rem,
-            apf=apf,
-        ))
+
+    each(lambda node: pool.apply_async(
+        partial(_resolve, apf=apf),
+        args=(node, artifacts),
+        callback=partial(_on_done, artifacts, graph, node, done, rem, apf=apf)
+    ), frontier)
 
     pool.close()
     pool.join()
@@ -139,17 +135,12 @@ def _on_done(artifacts, graph, node, done, rem, value, apf=False, **kwargs):
         return
 
     pool = mp.Pool(processes=min(max(1, mp.cpu_count() - 1), len(batch)))
-    for nxt in batch:
-        pool.apply_async(_resolve, args=(nxt, artifacts), callback=partial(
-            _on_done,
-            artifacts,
-            graph,
-            nxt,
-            done,
-            rem,
-            apf=apf,
-            **kwargs
-        ))
+
+    each(lambda node: pool.apply_async(
+        _resolve,
+        args=(node, artifacts),
+        callback=partial(_on_done, artifacts, graph, node, done, rem, apf=apf, **kwargs)
+    ), batch)
 
     pool.close()
     pool.join()
