@@ -6,9 +6,9 @@ artifacts.
 
 from functools import reduce
 import operator
+from exos import each
 from . import builder
-from . import utils
-from . import langda as ft
+from . import utils as u
 
 def _fluent(cls, attr, *args):
     """ provides a fluent interface for any classes that choose to apply it. """
@@ -103,7 +103,7 @@ class Artifax:
         self._allow_partial_functions = allow_partial_functions
 
     def _update_graph(self):
-        self._graph = utils.to_graph(self._artifacts)
+        self._graph = u.to_graph(self._artifacts)
 
     def set(self, node, value):
         """ Sets node value. """
@@ -115,7 +115,7 @@ class Artifax:
 
     def _revoke(self, node):
         self._stale.add(node)
-        ft.each(self._graph[node], self._revoke)
+        each(self._revoke, self._graph[node])
 
     def pop(self, node):
         """ Removes node from the artifacts. """
@@ -188,15 +188,13 @@ class Artifax:
         if targets is None:
             return self._result
 
-        payload = tuple([
-            self._result[target] for target in targets
-        ])
+        payload = tuple([self._result[target] for target in targets])
         return payload if len(payload) > 1 else payload[0]
 
     def initial(self):
         """ Returns the initial objects of the artifacts graph, that is,
         the nodes that have no incoming edges, no dependencies."""
-        return utils.initial(self._graph)
+        return u.initial(self._graph)
 
     def number_of_edges(self):
         """ Returns the number of edges in the artifacts graph."""
