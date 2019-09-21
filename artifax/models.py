@@ -108,8 +108,13 @@ class Artifax:
     def _update_graph(self):
         self._graph = u.to_graph(self._artifacts)
 
-    def set(self, node, value):
+    def set(self, *args, **kwargs):
         """ Sets node value. """
+        if kwargs:
+            for key, value in kwargs.items():
+                self.set(key, value)
+            return
+        node, value = args[0], args[1]
         if node in self._artifacts:
             self._revoke(node)
         self._stale.add(node)

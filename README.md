@@ -121,16 +121,16 @@ class Vector:
     def __repr__(self):
         return '({}, {})'.format(self.u, self.v)
 
-afx = artifax.Artifax({
-    'p1': (3, 4),
-    'v1': lambda p1: Vector(*p1),
-    'm1': lambda v1: v1.magnitude(),
-    'v2': Vector(5, 12),
-    'm2': lambda v2: v2.magnitude()
-})
+afx = artifax.Artifax(
+    p1=(3, 4),
+    v1=lambda p1: Vector(*p1),
+    m1=lambda v1: v1.magnitude(),
+    v2=Vector(5, 12),
+    m2=lambda v2: v2.magnitude()
+)
 _ = afx.build()
 print('Updating p1...')
-afx.set('p1', (1, 1))
+afx.set(p1=(1, 1))
 _ = afx.build()
 ```
 
