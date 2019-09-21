@@ -15,7 +15,7 @@ unescape = lambda v: reduce(lambda s, k: s.replace(_REPLACES[k], k), _REPLACES.k
 
 arglist = lambda v: (
     getfullargspec(v).args if callable(v) else
-    v.args()               if isinstance(v, At) else
+    v.args() if isinstance(v, At) else
     []
 )
 
@@ -65,7 +65,7 @@ def initial(graph):
 
     nodes = list(graph.keys())
     key = {nodes[i]: i for i in range(len(nodes))}
-    mask = reduce(lambda m, n: to_mask(m, n, graph, key), nodes, [0]*len(nodes))
+    mask = reduce(lambda m, n: to_mask(m, n, graph, key), nodes, [0] * len(nodes))
 
     return set([nodes[i] for i in range(len(mask)) if mask[i] == 0])
 

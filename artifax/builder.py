@@ -32,10 +32,10 @@ def build(artifacts, allow_partial_functions=False, solver='linear', **kwargs):
         **kwargs: solver-specific keyword arguments.
     """
     solvers = {
-        'linear':       _build_linear,
-        'bfs':          _build_bfs,
+        'linear': _build_linear,
+        'bfs': _build_bfs,
         'bfs_parallel': _build_parallel_bfs,
-        'async':        _build_async
+        'async': _build_async
     }
     if solver not in solvers:
         raise InvalidSolverError('unrecognized solver [{}]'.format(solver))
