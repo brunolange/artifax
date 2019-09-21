@@ -94,9 +94,10 @@ class Artifax:
         def __iter__(self):
             return iter(self._data)
 
-    def __init__(self, dic=None, allow_partial_functions=False):
+    def __init__(self, dic=None, allow_partial_functions=False, **kwargs):
         if dic is None:
             dic = {}
+        dic.update(kwargs)
         self._artifacts = dic.copy()
         self._graph = None
         self._update_graph()

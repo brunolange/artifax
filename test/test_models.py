@@ -71,11 +71,11 @@ class ModelTest(unittest.TestCase):
                 return 'foobar'
 
         exo = ExpensiveObject()
-        afx = Artifax({
-            'p': (3,4),
-            'q': (12, 13),
-            'exo': lambda q: exo.expensive_method(q),
-        })
+        afx = Artifax(
+            p=(3,4),
+            q=(12, 13),
+            exo=lambda q: exo.expensive_method(q),
+        )
 
         # pool_async silently fails to get trigger callback that resolves
         # the nodes, I guess because it can't pickle ExpensiveObject
@@ -129,9 +129,7 @@ class ModelTest(unittest.TestCase):
         self.assertEqual(c1, 'c1 after p1')
 
     def test_in_operator(self):
-        afx = Artifax({
-            'p': (3,4)
-        })
+        afx = Artifax(p=(3,4))
         self.assertTrue('p' in afx)
         self.assertFalse('q' in afx)
 
@@ -142,11 +140,11 @@ class ModelTest(unittest.TestCase):
         self.assertTrue('q' in afx)
 
     def test_targeted_build(self):
-        afx = Artifax({
-            'name': 'World',
-            'punctuation': '',
-            'greeting': lambda name, punctuation: 'Hello, {}{}'.format(name, punctuation),
-        })
+        afx = Artifax(
+            {'greeting': lambda name, punctuation: 'Hello, {}{}'.format(name, punctuation)},
+            name='World',
+            punctuation=''
+        )
         greeting = afx.build(targets='greeting')
         self.assertEqual(greeting, 'Hello, World')
 
