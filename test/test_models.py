@@ -185,12 +185,12 @@ class ModelTest(unittest.TestCase):
         def subtract(p, q):
             return p - q
 
-        afx = Artifax({
-            'ab': At('a', 'b', subtract),
-            'ba': At('b', 'a', subtract),
-            'a': -11,
-            'b': 7.5,
-        })
+        afx = Artifax(
+            ab=At('a', 'b', subtract),
+            ba=At('b', 'a', subtract),
+            a=-11,
+            b=7.5,
+        )
 
         ab, ba = afx.build(targets=('ab', 'ba'))
         self.assertEqual(ab, -18.5)
