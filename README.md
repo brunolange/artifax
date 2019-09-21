@@ -80,20 +80,21 @@ def double(x):
 afx = Artifax()
 afx.set('a', 42)
 afx.set('b', At('a', double))
-afx.set('c', lambda b: -b)
+# set also accepts named arguments
+afx.set(c=lambda b: -b)
 
-print(len(afx)) # prints 3
-print('b' in afx) # prints True
+assert len(afx) == 3
+assert 'b' in afx
 
 results = afx.build()
 for k, v in results.items():
     print(k, v)
+
+# c -84
+# a 42
+# b 84
 ```
-```
-c -84
-a 42
-b 84
-```
+
 ## Lazy builds
 
 Artifax instances optimize sequential builds by only re-evaluating nodes that
