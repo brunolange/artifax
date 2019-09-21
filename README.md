@@ -116,7 +116,7 @@ class Vector:
         self.u = u
         self.v = v
     def magnitude(self):
-        print('Calculating magnitude of vector {}...'.format(self)
+        print('Calculating magnitude of vector {}...'.format(self))
         return math.sqrt(self.u**2 + self.v**2)
     def __repr__(self):
         return '({}, {})'.format(self.u, self.v)
