@@ -101,7 +101,7 @@ class Artifax:
         self._graph = None
         self._update_graph()
         self._result = Artifax.Result()
-        self._stale = set(list(self._artifacts.keys()))
+        self._stale = set(self._artifacts.keys())
         self._allow_partial_functions = allow_partial_functions
 
     def _update_graph(self):
