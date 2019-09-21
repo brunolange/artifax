@@ -5,7 +5,6 @@ This module hosts the core build function and the private functions that aid it.
 
 from functools import reduce, partial
 from collections import deque
-import operator
 import pathos.multiprocessing as mp
 from exos import compose, each
 from . import utils as u
@@ -13,10 +12,11 @@ from .exceptions import UnresolvedDependencyError, InvalidSolverError
 
 # pylint: disable=C0103
 _apply = lambda v, *args: (
-    v(*args)            if callable(v) and args and len(u.arglist(v)) == len(args) else
-    partial(v, *args)   if callable(v) else
+    v(*args) if callable(v) and args and len(u.arglist(v)) == len(args) else
+    partial(v, *args) if callable(v) else
     v
 )
+
 
 def build(artifacts, allow_partial_functions=False, solver='linear', **kwargs):
     """ Core artifact building function. Given an input dictionary describing the
@@ -46,6 +46,7 @@ def build(artifacts, allow_partial_functions=False, solver='linear', **kwargs):
         **kwargs
     )
 
+
 def _build_linear(artifacts, apf=False):
 
     def _reducer(store, node):
@@ -55,10 +56,12 @@ def _build_linear(artifacts, apf=False):
     nodes = compose(u.topological_sort, u.to_graph)(artifacts)
     return reduce(_reducer, nodes, artifacts)
 
+
 def _pendencies(graph, node, done):
     return {
         k for k, v in graph.items() if node in v and k not in done
     }
+
 
 def _build_bfs(artifacts, apf=False):
     done = set()
@@ -71,6 +74,7 @@ def _build_bfs(artifacts, apf=False):
         frontier += [nxt for nxt in graph[node] if not _pendencies(graph, nxt, done)]
 
     return artifacts
+
 
 def _build_parallel_bfs(artifacts, apf=False, processes=None):
     done = set()
@@ -94,6 +98,7 @@ def _build_parallel_bfs(artifacts, apf=False, processes=None):
     pool.close()
 
     return artifacts
+
 
 def _build_async(artifacts, apf=False, processes=None):
     graph = u.to_graph(artifacts)
@@ -123,6 +128,7 @@ def _build_async(artifacts, apf=False, processes=None):
 
     return artifacts
 
+
 def _on_done(artifacts, graph, node, done, rem, value, apf=False, **kwargs):
     done.add(node)
     artifacts[node] = value
@@ -144,6 +150,7 @@ def _on_done(artifacts, graph, node, done, rem, value, apf=False, **kwargs):
 
     pool.close()
     pool.join()
+
 
 def _resolve(node, store, apf=False):
     value = store[node]

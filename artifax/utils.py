@@ -19,6 +19,7 @@ arglist = lambda v: (
     []
 )
 
+
 def to_graph(artifacts):
     """ returns a graph representation of the given artifacts """
     af_args = {k: arglist(v) for k, v in artifacts.items()}
@@ -26,6 +27,7 @@ def to_graph(artifacts):
         key: [k for k, v in af_args.items() if escape(key) in v]
         for key in artifacts
     }
+
 
 def topological_sort(graph):
     """ returns a topological sorting of nodes from the given graph
@@ -53,6 +55,7 @@ def topological_sort(graph):
         _visit(node, temp, perm, tlist)
     return tlist
 
+
 def initial(graph):
     def to_mask(mask, node, graph, key):
         neighbors = graph[node]
@@ -66,10 +69,12 @@ def initial(graph):
 
     return set([nodes[i] for i in range(len(mask)) if mask[i] == 0])
 
+
 def pprint(*args, **kwargs):
     """ Prepends message with process id information """
     print('[{}]'.format(os.getpid()), end=' ')
     print(*args, **kwargs)
+
 
 class At:
     """ The At class is but a wrapper for a tuple-like constructor

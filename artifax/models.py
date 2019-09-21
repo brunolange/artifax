@@ -10,12 +10,14 @@ from exos import each
 from . import builder
 from . import utils as u
 
+
 def _fluent(cls, attr, *args):
     """ provides a fluent interface for any classes that choose to apply it. """
     if args:
         setattr(cls, attr, args[0])
         return cls
     return getattr(cls, attr)
+
 
 class Artifax:
     """ The Artifax class enables artifacts to be built through a conventional
