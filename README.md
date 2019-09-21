@@ -2,7 +2,11 @@
 
 artifax is a Python package to evaluate nodes in a computation graph where
 the dependencies associated with each node are extracted directly from their
-function signatures.
+function signatures. Install with pip:
+
+```bash
+$ pip install artifax
+```
 
 A computation graph can be entirely encoded in a standard python dictionary.
 Each key represents a node or an artifact, that will eventually be computed
