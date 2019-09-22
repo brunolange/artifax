@@ -6,3 +6,4 @@ dist/
 venv*
 *.aux
 *.fdb_latexmk
+build/
