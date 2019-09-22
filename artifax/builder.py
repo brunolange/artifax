@@ -10,6 +10,11 @@ from exos import compose, each
 from . import utils as u
 from .exceptions import UnresolvedDependencyError, InvalidSolverError
 
+__author__ = 'Bruno Lange'
+__email__ = 'blangeram@gmail.com'
+__license__ = 'MIT'
+
+
 # pylint: disable=C0103
 _apply = lambda v, *args: (
     v(*args) if callable(v) and args and len(u.arglist(v)) == len(args) else

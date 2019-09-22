@@ -1,7 +1,15 @@
+"""Utilities module
+"""
+
 from inspect import getfullargspec
 from functools import reduce
 import os
 from . import exceptions
+
+__author__ = 'Bruno Lange'
+__email__ = 'blangeram@gmail.com'
+__license__ = 'MIT'
+
 
 _REPLACES = {
     '-': '_',

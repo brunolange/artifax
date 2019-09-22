@@ -10,6 +10,10 @@ from exos import each
 from . import builder
 from . import utils as u
 
+__author__ = 'Bruno Lange'
+__email__ = 'blangeram@gmail.com'
+__license__ = 'MIT'
+
 
 def _fluent(cls, attr, *args):
     """ provides a fluent interface for any classes that choose to apply it. """

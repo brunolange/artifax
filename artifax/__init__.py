@@ -8,3 +8,7 @@ from artifax.exceptions import *
 from artifax.utils import *
 from artifax.models import *
 import artifax.io
+
+__author__ = 'Bruno Lange'
+__email__ = 'blangeram@gmail.com'
+__license__ = 'MIT'

@@ -3,6 +3,10 @@ from jinja2 import Template
 import os
 from . import utils
 
+__author__ = 'Bruno Lange'
+__email__ = 'blangeram@gmail.com'
+__license__ = 'MIT'
+
 
 def tex(artifacts):
     graph = utils.to_graph(artifacts)

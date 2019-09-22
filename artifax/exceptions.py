@@ -1,3 +1,11 @@
+"""Exceptions for the artifax package
+"""
+
+__author__ = 'Bruno Lange'
+__email__ = 'blangeram@gmail.com'
+__license__ = 'MIT'
+
+
 class CircularDependencyError(Exception):
     """ Exception to be thrown when artifacts can not be built due to the fact
     that there is at least one closed loop in its graph representation which
