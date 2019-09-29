@@ -2,7 +2,21 @@
 
 artifax is a Python package to evaluate nodes in a computation graph where
 the dependencies associated with each node are extracted directly from their
-function signatures. Install with pip:
+function signatures. Here's an example of `artifax` in action:
+
+```python
+>>> from artifax import build
+>>> import math
+>>> build({
+...     'x': math.pi/3,
+...     'sin': lambda x: math.sin(x),
+...     'cos': lambda x: math.cos(x),
+...     'y': lambda sin, cos: 2*sin - 1.2*cos
+... })
+{'x': 1.0471975511965976, 'sin': 0.8660254037844386, 'cos': 0.5000000000000001, 'y': 1.132050807568877}
+```
+
+Install with pip:
 
 ```bash
 $ pip install artifax
