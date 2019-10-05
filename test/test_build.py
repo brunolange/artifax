@@ -148,7 +148,7 @@ class BuildTest(unittest.TestCase):
 
         # serialize results and add them to set
         # if results are the same, there should be only one element in the set
-        result_set = set([json.dumps(result, sort_keys=True) for result in results])
+        result_set = set(json.dumps(result, sort_keys=True) for result in results)
         self.assertEqual(len(result_set), 1)
 
         result = json.loads(next(iter(result_set)))

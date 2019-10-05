@@ -75,7 +75,7 @@ def initial(graph):
     key = {nodes[i]: i for i in range(len(nodes))}
     mask = reduce(lambda m, n: to_mask(m, n, graph, key), nodes, [0] * len(nodes))
 
-    return set([nodes[i] for i in range(len(mask)) if mask[i] == 0])
+    return set(nodes[i] for i in range(len(mask)) if mask[i] == 0)
 
 
 def pprint(*args, **kwargs):

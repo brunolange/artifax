@@ -201,8 +201,8 @@ The `build` function and methods accept an optional `solver` parameter which def
 
 ## The `linear` solver
 
-The linear solver topologically sorts the computation graph in order to generate a sequence
-of nodes to be calculated in order such that for any node, all of its dependencies appear
+The linear solver topologically sorts the computation graph to define a sequence
+of nodes to be calculated in an order such that for any node, all of its dependencies appear
 before in the sequence.
 
 ## The `parallel` solver

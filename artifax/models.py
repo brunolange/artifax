@@ -200,7 +200,7 @@ class Artifax:
         if targets is None:
             return self._result
 
-        payload = tuple([self._result[target] for target in targets])
+        payload = tuple(self._result[target] for target in targets)
         return payload if len(payload) > 1 else payload[0]
 
     def initial(self):
@@ -210,7 +210,7 @@ class Artifax:
 
     def number_of_edges(self):
         """ Returns the number of edges in the artifacts graph."""
-        return sum([len(v) for v in self._graph.values()])
+        return sum(len(v) for v in self._graph.values())
 
     def number_of_nodes(self):
         """ Returns the number of nodes in the artifacts graph."""
