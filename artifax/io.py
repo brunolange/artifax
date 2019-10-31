@@ -1,6 +1,9 @@
-from functools import reduce
-from jinja2 import Template
 import os
+from functools import reduce, partial
+import operator
+
+from jinja2 import Template
+
 from . import utils
 
 __author__ = 'Bruno Lange'
@@ -12,14 +15,19 @@ def tex(artifacts):
     graph = utils.to_graph(artifacts)
     nodes = utils.topological_sort(graph)
 
-    def _edge_reducer(pairs, key):
-        for value in graph[key]:
-            pairs.append((key, value))
-        return pairs
-
     with open(os.path.join(os.path.dirname(__file__), 'templates', 'dag.tex.j2')) as handle:
         template = Template(handle.read())
 
+    def pairs(item):
+        key, values = item
+        return [(key, v) for v in values]
+
+    edge_reducer = lambda g: reduce(
+        operator.iconcat,
+        map(pairs, g.items()),
+        []
+    )
+
     nodes = list(artifacts.keys())
-    edges = reduce(_edge_reducer, graph.keys(), [])
+    edges = edge_reducer(graph)
     return template.render(nodes=nodes, edges=edges)
