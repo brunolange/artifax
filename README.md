@@ -19,7 +19,7 @@ function signatures. Here's an example of `artifax` in action:
 Install with pip:
 
 ```bash
-$ pip install artifax
+$ python3 -m pip install artifax
 ```
 
 A computation graph can be entirely encoded in a standard python dictionary.
