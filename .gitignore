@@ -4,6 +4,7 @@ dist/
 *.egg-info
 .vscode/
 venv*
+pythonenv*/
 *.aux
 *.fdb_latexmk
 build/
