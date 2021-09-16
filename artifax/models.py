@@ -4,19 +4,21 @@ This module hosts classes that provided the object-oriented support to building
 artifacts.
 """
 
-from functools import reduce
 import operator
+from functools import reduce
+
 from exos import each
+
 from . import builder
 from . import utils as u
 
-__author__ = 'Bruno Lange'
-__email__ = 'blangeram@gmail.com'
-__license__ = 'MIT'
+__author__ = "Bruno Lange"
+__email__ = "blangeram@gmail.com"
+__license__ = "MIT"
 
 
 def _fluent(cls, attr, *args):
-    """ provides a fluent interface for any classes that choose to apply it. """
+    """provides a fluent interface for any classes that choose to apply it."""
     if args:
         setattr(cls, attr, args[0])
         return cls
@@ -24,14 +26,16 @@ def _fluent(cls, attr, *args):
 
 
 class Artifax:
-    """ The Artifax class enables artifacts to be built through a conventional
+    """The Artifax class enables artifacts to be built through a conventional
     object-oriented interface. Its stateful nature boasts additional capabilities
     like incremental builds and building of stale nodes only.
     """
+
     class Result:
-        """ The Result class acts as an augmented dictionary to
+        """The Result class acts as an augmented dictionary to
         hold the artifax build products and any additional information
-        deemed necessary or interesting. """
+        deemed necessary or interesting."""
+
         def __init__(self, *args, **kwargs):
             self._data = {}
             self.update(*args, **kwargs)
@@ -52,41 +56,40 @@ class Artifax:
             del self._data[key]
 
         def clear(self):
-            """ Removes all items from result. """
+            """Removes all items from result."""
             return self._data.clear()
 
         def copy(self):
-            """ Returns a shallow copy of the result dictionary. """
+            """Returns a shallow copy of the result dictionary."""
             return self._data.copy()
 
         def has_key(self, k):
-            """ Returns True if key k is part of the result and False otherwise.
-            """
+            """Returns True if key k is part of the result and False otherwise."""
             return k in self._data
 
         def update(self, *args, **kwargs):
-            """ R.update([E, ]**F) -> None.  Update R from dict/iterable E and F.
+            """R.update([E, ]**F) -> None.  Update R from dict/iterable E and F.
             If E is present and has a .keys() method, then does:  for k in E: R[k] = E[k]
             If E is present and lacks a .keys() method, then does:  for k, v in E: R[k] = v
-            In either case, this is followed by: for k in F:  R[k] = F[k] """
+            In either case, this is followed by: for k in F:  R[k] = F[k]"""
             return self._data.update(*args, **kwargs)
 
         def keys(self):
-            """ Returns a set-like object providing a view on D's keys. """
+            """Returns a set-like object providing a view on D's keys."""
             return self._data.keys()
 
         def values(self):
-            """ Returns an object providing a view on D's values. """
+            """Returns an object providing a view on D's values."""
             return self._data.values()
 
         def items(self):
-            """ Returns key, value pairs of data dictionary items. """
+            """Returns key, value pairs of data dictionary items."""
             return self._data.items()
 
         def pop(self, *args):
-            """ pop(k, [,d]) -> v, remove specified key and return
+            """pop(k, [,d]) -> v, remove specified key and return
             the corresponding value. If key is not found, d is returned
-            if given, otherwise KeyError is raised """
+            if given, otherwise KeyError is raised"""
             return self._data.pop(*args)
 
         def __cmp__(self, dict_):
@@ -113,7 +116,7 @@ class Artifax:
         self._graph = u.to_graph(self._artifacts)
 
     def set(self, *args, **kwargs):
-        """ Sets node value. """
+        """Sets node value."""
         if kwargs:
             for key, value in kwargs.items():
                 self.set(key, value)
@@ -130,7 +133,7 @@ class Artifax:
         each(self._revoke, self._graph[node])
 
     def pop(self, node):
-        """ Removes node from the artifacts. """
+        """Removes node from the artifacts."""
         if node in self._stale:
             self._stale.remove(node)
         item = self._artifacts.pop(node)
@@ -139,17 +142,17 @@ class Artifax:
 
     def _shipment(self, targets=None):
         nodes = (
-            self._stale if targets is None else
-            set(reduce(
-                operator.iconcat,
-                [self._dependencies(t) for t in targets] + [list(targets)],
-                []
-            ))
+            self._stale
+            if targets is None
+            else set(
+                reduce(
+                    operator.iconcat,
+                    [self._dependencies(t) for t in targets] + [list(targets)],
+                    [],
+                )
+            )
         )
-        return {
-            k: self._artifacts[k]
-            for k in nodes
-        }
+        return {k: self._artifacts[k] for k in nodes}
 
     def _dependencies(self, node):
         def _moonwalk(node, graph, dependencies):
@@ -162,8 +165,10 @@ class Artifax:
         _moonwalk(node, self._graph, dependencies)
         return dependencies
 
-    def build(self, targets=None, allow_partial_functions=None, solver='linear', **kwargs):
-        """ Builds artifacts. Returns either a dictionary of resolved nodes or a tuple
+    def build(
+        self, targets=None, allow_partial_functions=None, solver="linear", **kwargs
+    ):
+        """Builds artifacts. Returns either a dictionary of resolved nodes or a tuple
         where each item corresponds to one of the defined targets.
 
         Args:
@@ -188,8 +193,9 @@ class Artifax:
             shipment,
             solver=solver,
             allow_partial_functions=(
-                allow_partial_functions if allow_partial_functions is not None else
-                self._allow_partial_functions
+                allow_partial_functions
+                if allow_partial_functions is not None
+                else self._allow_partial_functions
             ),
             **kwargs
         )
@@ -204,16 +210,16 @@ class Artifax:
         return payload if len(payload) > 1 else payload[0]
 
     def initial(self):
-        """ Returns the initial objects of the artifacts graph, that is,
+        """Returns the initial objects of the artifacts graph, that is,
         the nodes that have no incoming edges, no dependencies."""
         return u.initial(self._graph)
 
     def number_of_edges(self):
-        """ Returns the number of edges in the artifacts graph."""
+        """Returns the number of edges in the artifacts graph."""
         return sum(len(v) for v in self._graph.values())
 
     def number_of_nodes(self):
-        """ Returns the number of nodes in the artifacts graph."""
+        """Returns the number of nodes in the artifacts graph."""
         return len(self._artifacts)
 
     def __len__(self):

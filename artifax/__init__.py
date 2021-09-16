@@ -5,10 +5,9 @@ function signatures.
 
 from artifax.builder import *
 from artifax.exceptions import *
-from artifax.utils import *
 from artifax.models import *
-import artifax.io
+from artifax.utils import *
 
-__author__ = 'Bruno Lange'
-__email__ = 'blangeram@gmail.com'
-__license__ = 'MIT'
+__author__ = "Bruno Lange"
+__email__ = "blangeram@gmail.com"
+__license__ = "MIT"

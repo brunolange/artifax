@@ -1,9 +1,11 @@
-import unittest
 import math
+import unittest
 from functools import partial
+
 from artifax import Artifax
 from artifax.exceptions import UnresolvedDependencyError
 from artifax.utils import At
+
 
 class ModelTest(unittest.TestCase):
 
