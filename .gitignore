@@ -8,3 +8,4 @@ pythonenv*/
 *.aux
 *.fdb_latexmk
 build/
+.pytest_cache/

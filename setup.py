@@ -17,7 +17,7 @@ setup(
     long_description_content_type="text/markdown",
     author="Bruno Lange",
     author_email="blangeram@gmail.com",
-    url="https://gitlab.com/brunolange/artifax",
+    url="https://github.com/brunolange/artifax",
     install_requires=requirements,
     python_requires=">=3.5",
     extras_require={"dev": ["pylint"]},
