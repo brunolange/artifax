@@ -180,7 +180,7 @@ class ModelTest(unittest.TestCase):
 
         # cannot use async solver here because C won't be
         # pickable from pyunit
-        _ = afx.build()['counter']()
+        _ = afx.build()['counter']
         self.assertEqual(C.counter, 1)
 
     def test_at_constructor(self):

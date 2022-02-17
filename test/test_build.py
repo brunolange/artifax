@@ -21,7 +21,7 @@ class BuildTest(unittest.TestCase):
     def test_artifact_immutability(self):
         artifacts = {
             'a': lambda: 42,
-            'b': lambda a: a()**2
+            'b': lambda a: a**2
         }
 
         results = build(artifacts, solver='async')
@@ -46,13 +46,24 @@ class BuildTest(unittest.TestCase):
         for k in artifacts:
             self.assertEqual(result[k], artifacts[k])
 
+    def test_function_with_no_args_build(self):
+        artifacts = {
+            'a': 'a',
+            'thing': lambda a: a,
+            'other_thing': lambda: 'other_thing',
+        }
+        result = build(artifacts, solver='linear')
+        self.assertEqual(result['a'], 'a')
+        self.assertEqual(result['thing'], 'a')
+        self.assertEqual(result['other_thing'], 'other_thing')
+
     def test_sample_build(self):
         artifacts = {
             'A': 42,
             'B': lambda: 7,
             'C': lambda: 10,
-            'AB': lambda A, B: A + B(),
-            'C minus B': lambda B, C: C() - B(),
+            'AB': lambda A, B: A + B,
+            'C minus B': lambda B, C: C - B,
             'greet': 'Hello',
             'msg': lambda greet, A: '{} World! The answer is {}.'.format(greet, A),
         }
