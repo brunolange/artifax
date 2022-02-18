@@ -178,7 +178,7 @@ class ModelTest(unittest.TestCase):
             {
                 "a": 42,
                 "b": lambda a: math.pow(a, 5),
-                "counter": lambda: C(),
+                "counter": lambda: C,
             }
         )
         result = afx.build(targets="b")

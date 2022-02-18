@@ -19,7 +19,7 @@ class BuildTest(unittest.TestCase):
         self.assertEqual(result, {"a": 42})
 
     def test_artifact_immutability(self):
-        artifacts = {"a": lambda: 42, "b": lambda a: a() ** 2}
+        artifacts = {"a": 42, "b": lambda a: a ** 2}
 
         results = build(artifacts, solver="async")
 
@@ -50,8 +50,8 @@ class BuildTest(unittest.TestCase):
             "A": 42,
             "B": lambda: 7,
             "C": lambda: 10,
-            "AB": lambda A, B: A + B(),
-            "C minus B": lambda B, C: C() - B(),
+            "AB": lambda A, B: A + B,
+            "C minus B": lambda B, C: C - B,
             "greet": "Hello",
             "msg": lambda greet, A: "{} World! The answer is {}.".format(greet, A),
         }
