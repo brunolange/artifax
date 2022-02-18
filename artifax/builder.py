@@ -20,7 +20,7 @@ __license__ = "MIT"
 # pylint: disable=C0103
 _apply = lambda v, *args: (
     v(*args)
-    if callable(v) and args and len(u.arglist(v)) == len(args)
+    if callable(v) and len(u.arglist(v)) == len(args)
     else partial(v, *args)
     if callable(v)
     else v
