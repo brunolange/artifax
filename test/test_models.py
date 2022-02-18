@@ -178,7 +178,7 @@ class ModelTest(unittest.TestCase):
             {
                 "a": 42,
                 "b": lambda a: math.pow(a, 5),
-                "counter": lambda: C,
+                "counter": lambda: C(),
             }
         )
         result = afx.build(targets="b")
@@ -190,7 +190,7 @@ class ModelTest(unittest.TestCase):
 
         # cannot use async solver here because C won't be
         # pickable from pyunit
-        _ = afx.build()["counter"]()
+        _ = afx.build()["counter"]
         self.assertEqual(C.counter, 1)
 
     def test_at_constructor(self):
