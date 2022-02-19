@@ -25,7 +25,7 @@ class UnresolvedDependencyError(Exception):
     def __str__(self):
         if not self.nodes:
             return super().__str__()
-        return "Missing dependencies".format(self.nodes)
+        return "Missing dependencies: {}".format(self.nodes)
 
 
 class InvalidSolverError(Exception):
