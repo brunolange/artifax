@@ -1,6 +1,7 @@
 # artifax
 
 ![Tests](https://github.com/brunolange/artifax/actions/workflows/pythonpackage.yml/badge.svg)
+![Coverage](https://img.shields.io/codecov/c/github/brunolange/artifax?color=%2334D058)
 
 artifax is a Python package to evaluate nodes in a computation graph where
 the dependencies associated with each node are extracted directly from their

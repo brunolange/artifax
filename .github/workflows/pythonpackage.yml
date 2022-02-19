@@ -32,4 +32,6 @@ jobs:
     - name: Test with pytest
       run: |
         pip install pytest
-        pytest
+        pytest --cov=artifax --cov-report=xml test
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v2
