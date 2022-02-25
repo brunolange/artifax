@@ -59,7 +59,7 @@ def test_build():
             "obj": obj,
             "list": [1, 2, 3],
             "dictionary": {"answer": 42},
-            "set": set([1, 2, 3.14]),
+            "set": {1, 2, 3.14},
         }
     )
     result = afx.build(solver="linear")
@@ -67,9 +67,9 @@ def test_build():
     assert result["float"] == 1.618
     assert result["string"] == "Hello"
     assert result["obj"] == obj
-    assert result["list"], [1, 2 == 3]
-    assert result["dictionary"], {"answer" == 42}
-    assert result["set"], set([1, 2, 3.0 == 4])
+    assert result["list"] == [1, 2, 3]
+    assert result["dictionary"] == {"answer": 42}
+    assert result["set"] == {1, 2, 3.14}
 
 
 def test_invalid_build():
