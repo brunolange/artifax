@@ -31,76 +31,6 @@ class Artifax:
     like incremental builds and building of stale nodes only.
     """
 
-    class Result:
-        """The Result class acts as an augmented dictionary to
-        hold the artifax build products and any additional information
-        deemed necessary or interesting."""
-
-        def __init__(self, *args, **kwargs):
-            self._data = {}
-            self.update(*args, **kwargs)
-
-        def __setitem__(self, key, item):
-            self._data[key] = item
-
-        def __getitem__(self, key):
-            return self._data[key]
-
-        def __repr__(self):
-            return repr(self._data)
-
-        def __len__(self):
-            return len(self._data)
-
-        def __delitem__(self, key):
-            del self._data[key]
-
-        def clear(self):
-            """Removes all items from result."""
-            return self._data.clear()
-
-        def copy(self):
-            """Returns a shallow copy of the result dictionary."""
-            return self._data.copy()
-
-        def has_key(self, k):
-            """Returns True if key k is part of the result and False otherwise."""
-            return k in self._data
-
-        def update(self, *args, **kwargs):
-            """R.update([E, ]**F) -> None.  Update R from dict/iterable E and F.
-            If E is present and has a .keys() method, then does:  for k in E: R[k] = E[k]
-            If E is present and lacks a .keys() method, then does:  for k, v in E: R[k] = v
-            In either case, this is followed by: for k in F:  R[k] = F[k]"""
-            return self._data.update(*args, **kwargs)
-
-        def keys(self):
-            """Returns a set-like object providing a view on D's keys."""
-            return self._data.keys()
-
-        def values(self):
-            """Returns an object providing a view on D's values."""
-            return self._data.values()
-
-        def items(self):
-            """Returns key, value pairs of data dictionary items."""
-            return self._data.items()
-
-        def pop(self, *args):
-            """pop(k, [,d]) -> v, remove specified key and return
-            the corresponding value. If key is not found, d is returned
-            if given, otherwise KeyError is raised"""
-            return self._data.pop(*args)
-
-        def __cmp__(self, dict_):
-            return self._data == dict_
-
-        def __contains__(self, item):
-            return item in self._data
-
-        def __iter__(self):
-            return iter(self._data)
-
     def __init__(self, dic=None, allow_partial_functions=False, **kwargs):
         if dic is None:
             dic = {}
@@ -108,7 +38,7 @@ class Artifax:
         self._artifacts = dic.copy()
         self._graph = None
         self._update_graph()
-        self._result = Artifax.Result()
+        self._result = {}
         self._stale = set(self._artifacts.keys())
         self._allow_partial_functions = allow_partial_functions
 

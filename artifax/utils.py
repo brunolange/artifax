@@ -12,18 +12,6 @@ __email__ = "blangeram@gmail.com"
 __license__ = "MIT"
 
 
-_REPLACES = {
-    "-": "_",
-}
-
-# make sure we can always undo a key replacement
-assert len(_REPLACES) == len({v: k for k, v in _REPLACES.items()})
-
-escape = lambda v: reduce(lambda s, k: s.replace(k, _REPLACES[k]), _REPLACES.keys(), v)
-unescape = lambda v: reduce(
-    lambda s, k: s.replace(_REPLACES[k], k), _REPLACES.keys(), v
-)
-
 arglist = lambda v: (
     getfullargspec(v).args if callable(v) else v.args() if isinstance(v, At) else []
 )
@@ -32,9 +20,7 @@ arglist = lambda v: (
 def to_graph(artifacts):
     """returns a graph representation of the given artifacts"""
     af_args = {k: arglist(v) for k, v in artifacts.items()}
-    return {
-        key: [k for k, v in af_args.items() if escape(key) in v] for key in artifacts
-    }
+    return {key: [k for k, v in af_args.items() if key in v] for key in artifacts}
 
 
 def topological_sort(graph):

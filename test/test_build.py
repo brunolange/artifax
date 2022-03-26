@@ -16,7 +16,7 @@ def test_single_artifact_build():
 
 
 def test_artifact_immutability():
-    artifacts = {"a": 42, "b": lambda a: a ** 2}
+    artifacts = {"a": 42, "b": lambda a: a**2}
 
     results = build(artifacts, solver="async")
 
@@ -62,7 +62,7 @@ def test_sample_build():
 
 def test_partial_build():
     artifacts = {
-        "A": lambda x: x ** 2,
+        "A": lambda x: x**2,
         "B": lambda A, x: A(x),
         "C": lambda A, x: "A(4)-{} is equal to {}".format(x, A(4) - x),
     }
@@ -80,18 +80,6 @@ def test_build_with_partial_functions():
 
     result = build(artifacts, allow_partial_functions=True)
     assert isinstance(result["b"], partial)
-
-
-def test_special_keys():
-    artifacts = {
-        "key-with-dash": "a value",
-        "bang": lambda key_with_dash: "{}!".format(key_with_dash),
-        "_underscore_key": lambda bang: "_{}_".format(bang),
-    }
-    result = build(artifacts)
-    assert result["key-with-dash"], "a value"
-    assert result["bang"], "a value!"
-    assert result["_underscore_key"], "_a value!_"
 
 
 def test_at_constructor():
