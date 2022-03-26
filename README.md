@@ -69,13 +69,13 @@ artifacts = {
 result = build(artifacts)
 
 for k, v in result.items():
-    print('{:<10}: {}'.format(k, v))
+    print(f"{k:<10}: {v}")
 ```
 outputs
 ```shell
 A         : 42
 B         : 7
-C         : functools.partial(<function <lambda> at 0x102c4fae8>)
+C         : 10
 AB        : 294
 C-B       : 3
 greeting  : Hello
