@@ -215,7 +215,33 @@ def test_stale():
     assert C.counter == 1
 
 
-def test_at_constructor():
+def test_at_build():
+    def add(x, y):
+        return x + y
+
+    def subtract(u, v):
+        return u - v
+
+    afx = Artifax(
+        sum=At("i", "j", add),
+        balance=At("current_balance", "payment", subtract),
+        current_balance=100,
+        payment=60,
+        i=1,
+        j=2,
+    )
+
+    assert afx.build() == {
+        "sum": 3,
+        "balance": 40,
+        "current_balance": 100,
+        "payment": 60,
+        "i": 1,
+        "j": 2,
+    }
+
+
+def test_targeted_at_build():
     def subtract(p, q):
         return p - q
 
@@ -229,3 +255,48 @@ def test_at_constructor():
     ab, ba = afx.build(targets=("ab", "ba"))
     assert ab, -1 == 0.5
     assert ba, 1 == 0.5
+
+
+def test_build_with_underscore_in_key_name():
+    subtract = lambda x, y: x - y
+    concatenate = lambda x, y: x + y
+    afx = Artifax(
+        a_b=At("a", "b", concatenate),
+        b_a=At("b", "a", concatenate),
+        message=At("greeting", "subject", concatenate),
+        **{
+            "a-b": At("a", "b", subtract),
+            "b-a": At("b", "a", subtract),
+        }
+    )
+    afx.set("a", -11)
+    afx.set("b", 7.5)
+    afx.set("greeting", "Hello")
+    afx.set("subject", "World")
+
+    assert afx.build() == {
+        "a": -11,
+        "b": 7.5,
+        "a_b": -3.5,
+        "b_a": -3.5,
+        "a-b": -18.5,
+        "b-a": 18.5,
+        "greeting": "Hello",
+        "subject": "World",
+        "message": "HelloWorld",
+    }
+
+
+def test_targeted_build_with_underscode_in_key_name():
+    afx = Artifax({"b": lambda a_snake: a_snake})
+    afx.set(a_snake=123)
+    assert afx.build(targets=["b"]) == 123
+
+    afx = Artifax(
+        {
+            "a_snake": lambda a: a,
+            "b": lambda a_snake: a_snake,
+        }
+    )
+    afx.set(a=123)
+    assert afx.build(targets=["b"]) == 123

@@ -82,18 +82,6 @@ def test_build_with_partial_functions():
     assert isinstance(result["b"], partial)
 
 
-def test_special_keys():
-    artifacts = {
-        "key-with-dash": "a value",
-        "bang": lambda key_with_dash: "{}!".format(key_with_dash),
-        "_underscore_key": lambda bang: "_{}_".format(bang),
-    }
-    result = build(artifacts)
-    assert result["key-with-dash"], "a value"
-    assert result["bang"], "a value!"
-    assert result["_underscore_key"], "_a value!_"
-
-
 def test_at_constructor():
     def subtract(p, q):
         return p - q

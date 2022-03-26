@@ -163,11 +163,10 @@ def _on_done(artifacts, graph, node, done, rem, value, apf=False, **kwargs):
 
 def _resolve(node, store, apf=False):
     value = store[node]
-    args = u.arglist(value)
+    keys = u.arglist(value)
     if isinstance(value, u.At):
-        args = value.args()
+        keys = value.args()
         value = value.value()
-    keys = [u.unescape(a) for a in args]
     args = [store[key] for key in keys if key in store]
     unresolved = [key for key in keys if key not in store]
     if not apf and unresolved:
