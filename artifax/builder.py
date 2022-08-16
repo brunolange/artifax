@@ -5,6 +5,7 @@ This module hosts the core build function and the private functions that aid it.
 
 from collections import deque
 from functools import partial, reduce
+from operator import ior
 
 import pathos.multiprocessing as mp
 from exos import compose, each
@@ -91,7 +92,7 @@ def _build_parallel_bfs(artifacts, apf=False, processes=None):
         )
         done |= frontier
         frontier = reduce(
-            lambda acc, curr: acc | curr,
+            ior,
             [
                 {nxt for nxt in graph[node] if not _pendencies(graph, nxt, done)}
                 for node in frontier
