@@ -5,6 +5,7 @@ This module hosts the core build function and the private functions that aid it.
 
 from collections import deque
 from functools import partial, reduce
+from operator import ior
 
 import pathos.multiprocessing as mp
 from exos import compose, each
@@ -20,7 +21,7 @@ __license__ = "MIT"
 # pylint: disable=C0103
 _apply = lambda v, *args: (
     v(*args)
-    if callable(v) and args is not None and len(u.arglist(v)) == len(args)
+    if callable(v) and len(u.arglist(v)) == len(args)
     else partial(v, *args)
     if callable(v)
     else v
@@ -91,7 +92,7 @@ def _build_parallel_bfs(artifacts, apf=False, processes=None):
         )
         done |= frontier
         frontier = reduce(
-            lambda acc, curr: acc | curr,
+            ior,
             [
                 {nxt for nxt in graph[node] if not _pendencies(graph, nxt, done)}
                 for node in frontier
@@ -163,11 +164,10 @@ def _on_done(artifacts, graph, node, done, rem, value, apf=False, **kwargs):
 
 def _resolve(node, store, apf=False):
     value = store[node]
-    args = u.arglist(value)
+    keys = u.arglist(value)
     if isinstance(value, u.At):
-        args = value.args()
+        keys = value.args()
         value = value.value()
-    keys = [u.unescape(a) for a in args]
     args = [store[key] for key in keys if key in store]
     unresolved = [key for key in keys if key not in store]
     if not apf and unresolved:

@@ -9,3 +9,6 @@ pythonenv*/
 *.aux
 *.fdb_latexmk
 build/
+.pytest_cache/
+.coverage
+coverage.xml

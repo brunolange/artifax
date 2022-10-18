@@ -31,5 +31,9 @@ jobs:
         flake8 artifax --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --per-file-ignores='__init__.py:F401,F403' --ignore=E731
     - name: Test with pytest
       run: |
-        pip install pytest
-        pytest
+        pip install pytest pytest-cov
+        pytest --cov=artifax --cov-report=xml test
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v2
+      with:
+        version: "v0.1.15"
