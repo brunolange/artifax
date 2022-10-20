@@ -112,6 +112,7 @@ class Artifax:
                 Throws InvalidSolverError if solver is not among the available options.
             **kwargs: Arbitrary keyword arguments that are solver-specific.
         """
+        return_bare_result = isinstance(targets, str)
         targets = (targets,) if isinstance(targets, str) else targets
         if targets:
             for target in targets:
@@ -137,7 +138,7 @@ class Artifax:
             return self._result
 
         payload = tuple(self._result[target] for target in targets)
-        return payload if len(payload) > 1 else payload[0]
+        return payload[0] if return_bare_result else payload
 
     def initial(self):
         """Returns the initial objects of the artifacts graph, that is,
