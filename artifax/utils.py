@@ -3,7 +3,7 @@
 
 import os
 from functools import reduce
-from inspect import getfullargspec
+from inspect import signature
 
 from . import exceptions
 
@@ -13,7 +13,7 @@ __license__ = "MIT"
 
 
 arglist = lambda v: (
-    getfullargspec(v).args if callable(v) else v.args() if isinstance(v, At) else []
+    list(signature(v).parameters.keys()) if callable(v) else v.args() if isinstance(v, At) else []
 )
 
 
