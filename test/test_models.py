@@ -290,7 +290,7 @@ def test_build_with_underscore_in_key_name():
 def test_targeted_build_with_underscode_in_key_name():
     afx = Artifax({"b": lambda a_snake: a_snake})
     afx.set(a_snake=123)
-    assert afx.build(targets=["b"]) == 123
+    assert afx.build(targets="b") == 123
 
     afx = Artifax(
         {
@@ -299,4 +299,14 @@ def test_targeted_build_with_underscode_in_key_name():
         }
     )
     afx.set(a=123)
-    assert afx.build(targets=["b"]) == 123
+    assert afx.build(targets="b") == 123
+
+
+def test_string_targeted_build_returns_bare_result():
+    afx = Artifax({"a": 10, "b": 20})
+    assert afx.build(targets="a") == 10
+
+
+def test_unary_list_targeted_build_returns_tuple():
+    afx = Artifax({"a": 10, "b": 20})
+    assert afx.build(targets=["a"]) == (10,)
