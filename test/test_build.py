@@ -126,32 +126,19 @@ def test_deep_build():
         assert results["c"] == "c"
 
 
-def test_solvers():
+@pytest.mark.parametrize("solver", ["linear", "bfs", "bfs_parallel", "async"])
+def test_solver(solver):
     def subtract(p, q):
         return p - q
 
-    solvers = ["linear", "bfs", "bfs_parallel", "async"]
-    results = [
-        build(
-            {
-                "a": -11,
-                "b": 7.5,
-                "a - b": At("a", "b", subtract),
-                "b - a": At("b", "a", subtract),
-            },
-            solver=solver,
-        )
-        for solver in solvers
-    ]
+    result = build(
+        {
+            "a": -11,
+            "b": 7.5,
+            "a - b": At("a", "b", subtract),
+            "b - a": At("b", "a", subtract),
+        },
+        solver=solver,
+    )
 
-    # make sure we have as many results as there are solvers
-    assert len(results) == len(solvers)
-
-    # serialize results and add them to set
-    # if results are the same, there should be only one element in the set
-    result_set = set(json.dumps(result, sort_keys=True) for result in results)
-    assert len(result_set) == 1
-
-    result = json.loads(next(iter(result_set)))
-    assert result["a - b"] == -18.5
-    assert result["b - a"] == 18.5
+    assert result == {"a": -11, "b": 7.5, "a - b": -18.5, "b - a": 18.5}
