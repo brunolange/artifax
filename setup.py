@@ -1,5 +1,6 @@
-from setuptools import setup
 from os import path
+
+from setuptools import setup
 
 with open("requirements.txt") as handle:
     requirements = handle.readlines()
@@ -10,7 +11,7 @@ with open(path.join(this_directory, "README.md"), encoding="utf-8") as f:
 
 setup(
     name="artifax",
-    version="0.5",
+    version="0.6",
     packages=["artifax"],
     description="python package for building artifacts from a computational graph",
     long_description=long_description,
@@ -19,6 +20,6 @@ setup(
     author_email="blangeram@gmail.com",
     url="https://github.com/brunolange/artifax",
     install_requires=requirements,
-    python_requires=">=3.5",
+    python_requires=">=3.7",
     extras_require={"dev": ["pylint"]},
 )
